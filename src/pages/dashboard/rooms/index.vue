@@ -259,10 +259,9 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-4">
-
     <!-- Room Header section -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl text-[#1814F3] font-semibold">Хона</h3>
+    <div class="flex justify-between items-center mt-16">
+      <h3 class="text-xl text-[#1814F3] font-semibold hidden lg:block">Хона</h3>
       <div class="flex gap-4 items-center">
 
         <!-- Filter title -->
@@ -465,6 +464,5 @@ onMounted(async () => {
       <!-- /showModal -->
     </Teleport>
     <!-- /Modal  -->
-
   </div>
 </template>
