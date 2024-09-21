@@ -1,10 +1,10 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from "@/stores/auth";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/solid";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from "vue-router";
 import api from "@/plugins/axios";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
@@ -26,10 +26,10 @@ const isInfo = ref(false);
 const showQr = ref(false);
 const pageNum = ref(1);
 const pageInfo = ref(1);
-const categoryId = ref('')
-const titleCategory = ref('');
-const qrCode = ref('');
-const urlQrCode = ref('')
+const categoryId = ref("");
+const titleCategory = ref("");
+const qrCode = ref("");
+const urlQrCode = ref("");
 const limit = 8;
 
 const columns = [
@@ -54,16 +54,16 @@ const columnsInfo = [
 ];
 
 const form = reactive({
-  img: '',
+  img: "",
   title: "",
-})
+});
 
 async function handleImage(event) {
   const file = event.target.files[0];
   const formData = new FormData();
   formData.append("file", file);
   let image = await categoryStore.uploadCategory(formData);
-  form.img = image.data
+  form.img = image.data;
 }
 
 const handleDelete = async () => {
@@ -74,7 +74,7 @@ const handleDelete = async () => {
 };
 
 const handleEdite = async (id) => {
-  await categoryStore.getCategoryById(id)
+  await categoryStore.getCategoryById(id);
   form.img = categoryStore.categoryById.img;
   form._id = categoryStore.categoryById._id;
   form.title = categoryStore.categoryById.title;
@@ -82,7 +82,7 @@ const handleEdite = async (id) => {
   form.codes = categoryStore.categoryById.codes;
   form.status = categoryStore.categoryById.status;
   showModal.value = true;
-}
+};
 
 async function submitForm() {
   if (!form._id) {
@@ -92,42 +92,63 @@ async function submitForm() {
   }
   await categoryStore.get(limit, pageNum.value, titleCategory.value);
   showModal.value = false;
-  resetForm()
-};
+  resetForm();
+}
 
 function openDelete(id) {
   isDelete.value = true;
-  categoryStore.getCategoryById(id)
+  categoryStore.getCategoryById(id);
 }
 
 function resetForm() {
-  delete form?._id
+  delete form?._id;
   form.img = "";
   form.title = "";
 }
 
 function closeModal() {
   showModal.value = false;
-  resetForm()
+  resetForm();
 }
 
 async function goPage(n, item) {
-  if (item === 'info') {
+  if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
+    await qrCodeStore.getAll(
+      12,
+      pageInfo.value,
+      "",
+      "",
+      "",
+      "",
+      "",
+      categoryId.value,
+    );
   } else {
     pageNum.value = n;
-    await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
-    await categoryStore.get(limit, pageNum.value, titleCategory.value)
+    await router.push({
+      name: "category",
+      query: { page: pageNum.value, title: titleCategory.value },
+    });
+    await categoryStore.get(limit, pageNum.value, titleCategory.value);
   }
 }
 
 async function prewPage(item) {
-  if (item === 'info') {
+  if (item === "info") {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
+    await qrCodeStore.getAll(
+      12,
+      pageInfo.value,
+      "",
+      "",
+      "",
+      "",
+      "",
+      categoryId.value,
+    );
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -137,11 +158,20 @@ async function prewPage(item) {
 }
 
 async function nextPage(item) {
-  if (item === 'info') {
+  if (item === "info") {
     if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
+    await qrCodeStore.getAll(
+      12,
+      pageInfo.value,
+      "",
+      "",
+      "",
+      "",
+      "",
+      categoryId.value,
+    );
   } else {
     const maxPage = Math.ceil(categoryStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -153,15 +183,27 @@ async function nextPage(item) {
 
 async function searchCategory() {
   pageNum.value = 1;
-  await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
-  await categoryStore.get(limit, pageNum.value, titleCategory.value)
+  await router.push({
+    name: "category",
+    query: { page: pageNum.value, title: titleCategory.value },
+  });
+  await categoryStore.get(limit, pageNum.value, titleCategory.value);
 }
 
 async function openInfo(id) {
   isInfo.value = true;
   categoryId.value = id;
   await categoryStore.getCategoryById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
+  await qrCodeStore.getAll(
+    12,
+    pageInfo.value,
+    "",
+    "",
+    "",
+    "",
+    "",
+    categoryId.value,
+  );
 }
 async function downloadFile(item) {
   try {
@@ -172,9 +214,9 @@ async function downloadFile(item) {
     }
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = blobUrl;
-    link.download = item.split('/').pop();
+    link.download = item.split("/").pop();
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -201,8 +243,8 @@ async function showFile(item) {
 }
 function closeFileModal() {
   showQr.value = false;
-  qrCode.value = '';
-  urlQrCode.value = '';
+  qrCode.value = "";
+  urlQrCode.value = "";
   isInfo.value = true;
 }
 
@@ -217,27 +259,31 @@ onMounted(async () => {
     const queryPage = route.query.page;
     const queryTitle = route.query.title;
     pageNum.value = Number(queryPage) || 1;
-    titleCategory.value = queryTitle || '';
-    await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
-    await categoryStore.get(limit, pageNum.value, titleCategory.value)
+    titleCategory.value = queryTitle || "";
+    await router.push({
+      name: "category",
+      query: { page: pageNum.value, title: titleCategory.value },
+    });
+    await categoryStore.get(limit, pageNum.value, titleCategory.value);
   } else {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
-
 </script>
 <template>
   <div class="flex flex-col gap-4">
-
     <!-- Header Category -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl text-[#1814F3] font-semibold">Тоифа</h3>
-      <div class="flex gap-4 items-center">
-
+    <div class="flex items-center justify-between">
+      <h3 class="text-main text-xl font-semibold">Тоифа</h3>
+      <div class="flex items-center gap-4">
         <!-- Filter title -->
-        <input type="text"
-          class="w-40 px-4 py-1.5 border rounded-md text-[#1814F3] focus:outline-none focus:border-[#1814F3] placeholder:text-[#8BA3CB]"
-          placeholder="Тоифа номи" v-model="titleCategory" @input="searchCategory">
+        <input
+          type="text"
+          class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Тоифа номи"
+          v-model="titleCategory"
+          @input="searchCategory"
+        />
         <!-- /Filter title -->
 
         <BaseButton @click="showModal = true" class="text-green-600">
@@ -248,43 +294,70 @@ onMounted(async () => {
     <!-- /Header Category -->
 
     <!-- Table  -->
-    <div class="h-[600px] overflow-auto bg-white rounded-2xl py-2">
-      <CategoryTable :columns="columns" :data="categoryStore.categories" @edite="handleEdite" @delete="openDelete"
-        :page="pageNum" :limit="limit" @main="openInfo" />
+    <div class="h-[600px] overflow-auto rounded-2xl bg-white py-2">
+      <CategoryTable
+        :columns="columns"
+        :data="categoryStore.categories"
+        @edite="handleEdite"
+        @delete="openDelete"
+        :page="pageNum"
+        :limit="limit"
+        @main="openInfo"
+      />
     </div>
     <!-- /Table  -->
 
     <!-- Pagination -->
-    <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-      <span class="flex items-center cursor-pointer" @click="prewPage">
-        <ChevronLeftIcon class="w-4 h-4" />
+    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
+      <span class="flex cursor-pointer items-center" @click="prewPage">
+        <ChevronLeftIcon class="h-4 w-4" />
       </span>
-      <span v-if="pageNum > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        :class="1 === pageNum ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1)">
+      <span
+        v-if="pageNum > 2"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        :class="1 === pageNum ? 'bg-main text-white' : ''"
+        @click="goPage(1)"
+      >
         {{ 1 }}
       </span>
       <span v-if="pageNum > 2">...</span>
-      <span v-if="pageNum > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        @click="goPage(pageNum - 1)">
+      <span
+        v-if="pageNum > 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum - 1)"
+      >
         {{ pageNum - 1 }}
       </span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-        @click="goPage(pageNum)">
+      <span
+        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+        @click="goPage(pageNum)"
+      >
         {{ pageNum }}
       </span>
-      <span v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1"
-        class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageNum + 1)">
+      <span
+        v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum + 1)"
+      >
         {{ Number(pageNum) + 1 }}
       </span>
-      <span v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1">...</span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+      <span v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1"
+        >...</span
+      >
+      <span
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
         v-if="Math.ceil(categoryStore.count / limit) > pageNum"
-        :class="Math.ceil(categoryStore.count / limit) === pageNum ? 'text-white bg-[#1814F3]' : ''"
-        @click="goPage(Math.ceil(categoryStore.count / limit))">
+        :class="
+          Math.ceil(categoryStore.count / limit) === pageNum
+            ? 'bg-main text-white'
+            : ''
+        "
+        @click="goPage(Math.ceil(categoryStore.count / limit))"
+      >
         {{ Math.ceil(categoryStore.count / limit) }}
       </span>
-      <span class="flex gap-1 items-center cursor-pointer" @click="nextPage">
-        <ChevronRightIcon class="w-4 h-4" />
+      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
+        <ChevronRightIcon class="h-4 w-4" />
       </span>
     </div>
     <!-- /Pagination-->
@@ -293,17 +366,30 @@ onMounted(async () => {
     <Teleport to="body">
       <!-- Add and Edite Modal -->
       <BaseModal :show="showModal" @close="closeModal">
-        <template #header>Тоифа{{ form._id ? 'ни ўзгартириш' : ' яратиш' }}</template>
+        <template #header
+          >Тоифа{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template
+        >
         <template #body>
           <BaseForm class="grid grid-cols-2 gap-2">
-            <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
-              @change="handleImage" />
-            <BaseInput v-model="form.title" label="Тоифа номи" placeholder="Тоифа номи" inputType="string" />
+            <BaseInput
+              label="Расм"
+              inputType="file"
+              :placeholder="form.img ? form.img : 'add image'"
+              @change="handleImage"
+            />
+            <BaseInput
+              v-model="form.title"
+              label="Тоифа номи"
+              placeholder="Тоифа номи"
+              inputType="string"
+            />
           </BaseForm>
         </template>
         <template #button>
-          <button @click="submitForm"
-            class="w-32 bg-blue-100 text-blue-600 hover:bg-blue-300 transition-all ease-linear rounded-md py-1">
+          <button
+            @click="submitForm"
+            class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300"
+          >
             Сақлаш
           </button>
         </template>
@@ -311,11 +397,17 @@ onMounted(async () => {
       <!-- /Add and Edite Modal -->
 
       <!-- Delete Modal -->
-      <DeleteModal :show="isDelete" @close="isDelete = false" @delete="handleDelete">
+      <DeleteModal
+        :show="isDelete"
+        @close="isDelete = false"
+        @delete="handleDelete"
+      >
         <div class="flex justify-center">
-          <p class="text-gray-500">Сиз
+          <p class="text-gray-500">
+            Сиз
             <span class="capitalize text-red-400">
-              {{ categoryStore.categoryById?.title }}</span>
+              {{ categoryStore.categoryById?.title }}</span
+            >
             тоифани ўчирмоқдасиз!
           </p>
         </div>
@@ -324,49 +416,92 @@ onMounted(async () => {
 
       <!-- Info Modal -->
       <InfoRoomModal :show="isInfo" @close="closeInfo">
-        <template #header>Тоифа: {{ categoryStore.categoryById?.title }}</template>
+        <template #header
+          >Тоифа: {{ categoryStore.categoryById?.title }}</template
+        >
         <template #body>
-          <div v-if="!qrCodeStore.qrCodes.length"
-            class="lg:h-[640px] overflow-auto bg-white rounded-2xl py-2 text-center text-[#1814F3]">
+          <div
+            v-if="!qrCodeStore.qrCodes.length"
+            class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[640px]"
+          >
             Бу тоифага маҳсулот бириктирилмаган
           </div>
-          <div v-else class="lg:h-[660px] overflow-auto bg-white rounded-2xl py-2">
-            <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
-              :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+          <div
+            v-else
+            class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]"
+          >
+            <qrCodeTable
+              :columns="columnsInfo"
+              :data="qrCodeStore.qrCodes"
+              :page="pageInfo"
+              :limit="12"
+              :count="qrCodeStore.count"
+              :summa="qrCodeStore.summa"
+              @download="downloadFile"
+              @showQr="showFile"
+            />
           </div>
         </template>
         <template #footer>
           <!-- Pagination -->
-          <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-            <span class="flex items-center cursor-pointer" @click="prewPage('info')">
-              <ChevronLeftIcon class="w-4 h-4" />
+          <div
+            class="text-main flex w-full items-center justify-end gap-2 px-10"
+          >
+            <span
+              class="flex cursor-pointer items-center"
+              @click="prewPage('info')"
+            >
+              <ChevronLeftIcon class="h-4 w-4" />
             </span>
-            <span v-if="pageInfo > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-              :class="1 === pageInfo ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1, 'info')">
+            <span
+              v-if="pageInfo > 2"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              :class="1 === pageInfo ? 'bg-main text-white' : ''"
+              @click="goPage(1, 'info')"
+            >
               {{ 1 }}
             </span>
             <span v-if="pageInfo > 2">...</span>
-            <span v-if="pageInfo > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-              @click="goPage(pageInfo - 1, 'info')">
+            <span
+              v-if="pageInfo > 1"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              @click="goPage(pageInfo - 1, 'info')"
+            >
               {{ pageInfo - 1 }}
             </span>
-            <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-              @click="goPage(pageInfo, 'info')">
+            <span
+              class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+              @click="goPage(pageInfo, 'info')"
+            >
               {{ pageInfo }}
             </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageInfo + 1, 'info')">
+            <span
+              v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              @click="goPage(pageInfo + 1, 'info')"
+            >
               {{ Number(pageInfo) + 1 }}
             </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1">...</span>
-            <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
+              >...</span
+            >
+            <span
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
               v-if="Math.ceil(qrCodeStore.count / 12) > pageInfo"
-              :class="Math.ceil(qrCodeStore.count / 12) === pageInfo ? 'text-white bg-[#1814F3]' : ''"
-              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')">
+              :class="
+                Math.ceil(qrCodeStore.count / 12) === pageInfo
+                  ? 'bg-main text-white'
+                  : ''
+              "
+              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')"
+            >
               {{ Math.ceil(qrCodeStore.count / 12) }}
             </span>
-            <span class="flex gap-1 items-center cursor-pointer" @click="nextPage('info')">
-              <ChevronRightIcon class="w-4 h-4" />
+            <span
+              class="flex cursor-pointer items-center gap-1"
+              @click="nextPage('info')"
+            >
+              <ChevronRightIcon class="h-4 w-4" />
             </span>
           </div>
           <!-- /Pagination-->
@@ -378,8 +513,8 @@ onMounted(async () => {
       <BaseModal :show="showQr" @close="closeFileModal">
         <template #header>Қр Код: {{ qrCode }} </template>
         <template #body>
-          <div class="flex justify-center items-center p-20">
-            <img class="w-64 h-64" :src="urlQrCode" alt="Qr Code">
+          <div class="flex items-center justify-center p-20">
+            <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
           </div>
         </template>
       </BaseModal>

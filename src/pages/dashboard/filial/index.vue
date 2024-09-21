@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from "@/stores/auth";
 import { useFilialStore } from "@/stores/filial";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from "vue-router";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/solid";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
@@ -18,7 +18,7 @@ const authStore = useAuthStore();
 const showModal = ref(false);
 const isDelete = ref(false);
 const pageNum = ref(1);
-const titleFilial = ref('');
+const titleFilial = ref("");
 const limit = 8;
 const form = reactive({
   img: "",
@@ -34,7 +34,7 @@ const columns = [
   { name: "Рақами" },
   { name: "Манзили" },
   { name: "Статуси" },
-  { name: "", },
+  { name: "" },
 ];
 
 async function handleImage(event) {
@@ -89,7 +89,6 @@ async function submitForm() {
   }
 }
 
-
 function openDelete(id) {
   filialStore.getFilialById(id);
   isDelete.value = true;
@@ -110,7 +109,10 @@ function closeModal() {
 
 async function goPage(n) {
   pageNum.value = n;
-  await router.push({ name: "filial", query: { page: pageNum.value, filial: titleFilial.value } });
+  await router.push({
+    name: "filial",
+    query: { page: pageNum.value, filial: titleFilial.value },
+  });
   await filialStore.get(limit, pageNum.value, titleFilial.value);
 }
 async function prewPage() {
@@ -129,7 +131,10 @@ async function nextPage() {
 }
 async function searchFilial() {
   pageNum.value = 1;
-  await router.push({ name: "filial", query: { page: pageNum.value, filial: titleFilial.value } });
+  await router.push({
+    name: "filial",
+    query: { page: pageNum.value, filial: titleFilial.value },
+  });
   await filialStore.get(limit, pageNum.value, titleFilial.value);
 }
 
@@ -137,7 +142,7 @@ onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
     const queryPage = Number(route.query.page) || 1;
-    const queryFilialTitle = route.query.filial || '';
+    const queryFilialTitle = route.query.filial || "";
 
     pageNum.value = queryPage;
     titleFilial.value = queryFilialTitle;
@@ -150,16 +155,18 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-4">
-
     <!-- Header Category -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl text-[#1814F3] font-semibold">Филиал</h3>
-      <div class="flex gap-4 items-center">
-
+    <div class="flex items-center justify-between">
+      <h3 class="text-main text-xl font-semibold">Филиал</h3>
+      <div class="flex items-center gap-4">
         <!-- Filter title -->
-        <input type="text"
-          class="w-40 px-4 py-1.5 border rounded-md text-[#1814F3] focus:outline-none focus:border-[#1814F3] placeholder:text-[#8BA3CB]"
-          placeholder="Филиал номи" v-model="titleFilial" @input="searchFilial">
+        <input
+          type="text"
+          class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Филиал номи"
+          v-model="titleFilial"
+          @input="searchFilial"
+        />
         <!-- /Filter title -->
 
         <BaseButton @click="showModal = true" class="text-green-600">
@@ -167,43 +174,67 @@ onMounted(async () => {
         </BaseButton>
       </div>
     </div>
-    <div class="h-[600px] overflow-auto bg-white rounded-2xl py-2">
-      <FilialTable :columns="columns" :data="filialStore.filials" @delete="openDelete" @edite="handleEdite"
-        :page="pageNum" :limit="limit" />
+    <div class="h-[600px] overflow-auto rounded-2xl bg-white py-2">
+      <FilialTable
+        :columns="columns"
+        :data="filialStore.filials"
+        @delete="openDelete"
+        @edite="handleEdite"
+        :page="pageNum"
+        :limit="limit"
+      />
     </div>
     <!-- /Header Category -->
 
     <!-- Pagination -->
-    <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-      <span class="flex items-center cursor-pointer" @click="prewPage">
-        <ChevronLeftIcon class="w-4 h-4" />
+    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
+      <span class="flex cursor-pointer items-center" @click="prewPage">
+        <ChevronLeftIcon class="h-4 w-4" />
       </span>
-      <span v-if="pageNum > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        :class="1 === pageNum ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1)">
+      <span
+        v-if="pageNum > 2"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        :class="1 === pageNum ? 'bg-main text-white' : ''"
+        @click="goPage(1)"
+      >
         {{ 1 }}
       </span>
       <span v-if="pageNum > 2">...</span>
-      <span v-if="pageNum > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        @click="goPage(pageNum - 1)">
+      <span
+        v-if="pageNum > 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum - 1)"
+      >
         {{ pageNum - 1 }}
       </span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-        @click="goPage(pageNum)">
+      <span
+        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+        @click="goPage(pageNum)"
+      >
         {{ pageNum }}
       </span>
-      <span v-if="pageNum < Math.ceil(filialStore.count / limit) - 1"
-        class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageNum + 1)">
+      <span
+        v-if="pageNum < Math.ceil(filialStore.count / limit) - 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum + 1)"
+      >
         {{ Number(pageNum) + 1 }}
       </span>
       <span v-if="pageNum < Math.ceil(filialStore.count / limit) - 1">...</span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+      <span
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
         v-if="Math.ceil(filialStore.count / limit) > pageNum"
-        :class="Math.ceil(filialStore.count / limit) === pageNum ? 'text-white bg-[#1814F3]' : ''"
-        @click="goPage(Math.ceil(filialStore.count / limit))">
+        :class="
+          Math.ceil(filialStore.count / limit) === pageNum
+            ? 'bg-main text-white'
+            : ''
+        "
+        @click="goPage(Math.ceil(filialStore.count / limit))"
+      >
         {{ Math.ceil(filialStore.count / limit) }}
       </span>
-      <span class="flex gap-1 items-center cursor-pointer" @click="nextPage">
-        <ChevronRightIcon class="w-4 h-4" />
+      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
+        <ChevronRightIcon class="h-4 w-4" />
       </span>
     </div>
     <!-- /Pagination-->
@@ -212,19 +243,42 @@ onMounted(async () => {
     <Teleport to="body">
       <!-- Add end Create Modal -->
       <BaseModal :show="showModal" @close="closeModal">
-        <template #header>Филиал{{ form._id ? 'ни Узгартириш' : ' яратиш' }}</template>
+        <template #header
+          >Филиал{{ form._id ? "ни Узгартириш" : " яратиш" }}</template
+        >
         <template #body>
           <BaseForm class="grid grid-cols-2 gap-2">
-            <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
-              @change="handleImage" />
-            <BaseInput v-model="form.title" label="Номи" placeholder="Номи" inputType="string" />
-            <BaseInput v-model="form.number" label="Рақами" placeholder="Рақами" inputType="number" />
-            <BaseInput v-model="form.address" label="Манзили" placeholder="Манзили" inputType="string" />
+            <BaseInput
+              label="Расм"
+              inputType="file"
+              :placeholder="form.img ? form.img : 'add image'"
+              @change="handleImage"
+            />
+            <BaseInput
+              v-model="form.title"
+              label="Номи"
+              placeholder="Номи"
+              inputType="string"
+            />
+            <BaseInput
+              v-model="form.number"
+              label="Рақами"
+              placeholder="Рақами"
+              inputType="number"
+            />
+            <BaseInput
+              v-model="form.address"
+              label="Манзили"
+              placeholder="Манзили"
+              inputType="string"
+            />
           </BaseForm>
         </template>
         <template #button>
-          <button @click="submitForm"
-            class="w-32 bg-blue-100 text-blue-600 hover:bg-blue-300 transition-all ease-linear rounded-md py-1">
+          <button
+            @click="submitForm"
+            class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300"
+          >
             Сақлаш
           </button>
         </template>
@@ -232,11 +286,19 @@ onMounted(async () => {
       <!-- /Add end Create Modal -->
 
       <!-- Delete Modal -->
-      <DeleteModal :show="isDelete" @close="isDelete = false" @delete="handleDelete">
+      <DeleteModal
+        :show="isDelete"
+        @close="isDelete = false"
+        @delete="handleDelete"
+      >
         <div class="flex justify-center">
-          <p class="text-gray-500"> Сиз <span class="capitalize text-red-400">
+          <p class="text-gray-500">
+            Сиз
+            <span class="capitalize text-red-400">
               {{ filialStore.filialById?.title }}
-            </span> филифлини учирмоқдасиз!</p>
+            </span>
+            филифлини учирмоқдасиз!
+          </p>
         </div>
       </DeleteModal>
 

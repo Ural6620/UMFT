@@ -38,22 +38,30 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="lg:grid grid-cols-2 w-screen h-screen">
-    <div class="absolute lg:sticky top-0 w-full h-screen ">
-      <img class="w-full h-full " src="@/assets/Без названия.png" alt="image UMFT">
-    </div>
-    <div class="w-full h-full flex flex-col items-center justify-center z-10 relative">
-      <form @submit.prevent="submitForm"
-        class="w-96 h-auto bg-white rounded-md shadow-md flex flex-col items-center py-10">
-        <BaseInput label="Логин" placeholder="Логинингизни киритинг" input-type="text" v-model="form.login"
-          class="w-64" />
-        <PasswordInput label="Парол" placeholder="Паролингизни киритинг" input-type="password" v-model="form.password"
-          :icon="EyeIcon" />
-        <button
-          class="rounded-md px-4 py-1.5 bg-blue-100 text-blue-600 transition ease-linear duration-300 outline-blue-400 hover:bg-blue-300"
-          type="submit">
-          Кириш
-        </button>
+  <div class="bg-main flex h-screen w-screen items-center justify-center">
+    <div class="flex flex-col items-center justify-center gap-4">
+      <img src="@/assets/logo.svg" alt="" class="w-[384px]" />
+      <div class="text-center text-[36px] font-bold text-white">
+        Инвентаризация
+      </div>
+      <form
+        @submit.prevent="submitForm"
+        class="flex h-auto w-96 flex-col items-center gap-4 rounded-md bg-white p-8 py-10 shadow-md"
+      >
+        <BaseInput
+          label="Логин"
+          placeholder="Логинингизни киритинг"
+          input-type="text"
+          v-model="form.login"
+        />
+        <PasswordInput
+          label="Парол"
+          placeholder="Паролингизни киритинг"
+          input-type="password"
+          v-model="form.password"
+          :icon="EyeIcon"
+        />
+        <button class="btn-primary" type="submit">Кириш</button>
       </form>
     </div>
   </div>

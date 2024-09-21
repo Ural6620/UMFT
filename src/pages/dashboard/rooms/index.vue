@@ -1,11 +1,15 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/solid";
-import { useAuthStore } from '@/stores/auth';
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/vue/24/solid";
+import { useAuthStore } from "@/stores/auth";
 import { useRoomStore } from "@/stores/room";
 import { useFilialStore } from "@/stores/filial";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from "vue-router";
 import api from "@/plugins/axios";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
@@ -31,13 +35,13 @@ const showQr = ref(false);
 const showModal = ref(false);
 const pageNum = ref(1);
 const pageInfo = ref(1);
-const roomId = ref('');
-const filialId = ref('');
-const titleRoom = ref('');
-const filialSelect = ref('');
-const orderRoom = ref('');
-const qrCode = ref('');
-const urlQrCode = ref('');
+const roomId = ref("");
+const filialId = ref("");
+const titleRoom = ref("");
+const filialSelect = ref("");
+const orderRoom = ref("");
+const qrCode = ref("");
+const urlQrCode = ref("");
 const limit = 15;
 
 const form = reactive({
@@ -70,7 +74,11 @@ const columnsInfo = [
 ];
 
 const status = [{ id: 1, name: "Фаол" }, { id: 2, name: "Фаол емас" }, 2];
-const type = [{ id: 1, name: "Ўқув хонаси" }, { id: 2, name: "Маиший хона" }, 2];
+const type = [
+  { id: 1, name: "Ўқув хонаси" },
+  { id: 2, name: "Маиший хона" },
+  2,
+];
 
 const handleDelete = async () => {
   pageNum.value = 1;
@@ -85,7 +93,7 @@ const handleEdite = async (id) => {
   form.title = roomStore.roomById.title;
   form.number = roomStore.roomById.number;
   form.filial = roomStore.roomById.filial._id;
-  form.status = roomStore.roomById.status === 1 ? 'Фаол' : 'Фаол емас';
+  form.status = roomStore.roomById.status === 1 ? "Фаол" : "Фаол емас";
   form.type = roomStore.roomById.type === 1 ? "Ўқув хонаси" : "Маиший хона";
   showModal.value = true;
 };
@@ -96,7 +104,13 @@ const submitForm = async () => {
   } else {
     await roomStore.updateRoom(form);
   }
-  await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+  await roomStore.get(
+    limit,
+    pageNum.value,
+    titleRoom.value,
+    filialId.value,
+    orderRoom.value,
+  );
   showModal.value = false;
   resetForm();
 };
@@ -121,22 +135,35 @@ async function openDelete(id) {
 }
 
 async function goPage(n, item) {
-  if (item === 'info') {
+  if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, '', filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
   } else {
     pageNum.value = n;
-    router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+    router.push({
+      name: "rooms",
+      query: {
+        page: pageNum.value,
+        room: titleRoom.value,
+        filial: filialId.value,
+      },
+    });
+    await roomStore.get(
+      limit,
+      pageNum.value,
+      titleRoom.value,
+      filialId.value,
+      orderRoom.value,
+    );
   }
 }
 
 async function prewPage(item) {
-  if (item === 'info') {
+  if (item === "info") {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, '', filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -146,11 +173,11 @@ async function prewPage(item) {
 }
 
 async function nextPage(item) {
-  if (item === 'info') {
+  if (item === "info") {
     if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, '', filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
   } else {
     const maxPage = Math.ceil(roomStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -160,34 +187,67 @@ async function nextPage(item) {
   }
 }
 
-
 async function filterFilial(item) {
   pageNum.value = 1;
-  filialId.value = item._id || '';
-  filialSelect.value = item.title || 'Барча филиаллар';
-  filialStore.get(0)
-  router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value, filialTitle: filialSelect.value } });
-  await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+  filialId.value = item._id || "";
+  filialSelect.value = item.title || "Барча филиаллар";
+  filialStore.get(0);
+  router.push({
+    name: "rooms",
+    query: {
+      page: pageNum.value,
+      room: titleRoom.value,
+      filial: filialId.value,
+      filialTitle: filialSelect.value,
+    },
+  });
+  await roomStore.get(
+    limit,
+    pageNum.value,
+    titleRoom.value,
+    filialId.value,
+    orderRoom.value,
+  );
   isFilial.value = false;
 }
 
 async function searchRoomTitle() {
   pageNum.value = 1;
-  router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
+  router.push({
+    name: "rooms",
+    query: {
+      page: pageNum.value,
+      room: titleRoom.value,
+      filial: filialId.value,
+    },
+  });
   await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value);
 }
 
 async function searchRoomOrder() {
   pageNum.value = 1;
-  router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-  await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+  router.push({
+    name: "rooms",
+    query: {
+      page: pageNum.value,
+      room: titleRoom.value,
+      filial: filialId.value,
+    },
+  });
+  await roomStore.get(
+    limit,
+    pageNum.value,
+    titleRoom.value,
+    filialId.value,
+    orderRoom.value,
+  );
 }
 
 async function openInfo(id) {
   isInfo.value = true;
   roomId.value = id;
   await roomStore.getRoomById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, '', roomId.value);
+  await qrCodeStore.getAll(12, pageInfo.value, "", roomId.value);
 }
 async function downloadFile(item) {
   try {
@@ -198,9 +258,9 @@ async function downloadFile(item) {
     }
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = blobUrl;
-    link.download = item.split('/').pop();
+    link.download = item.split("/").pop();
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -227,8 +287,8 @@ async function showFile(item) {
 }
 function closeFileModal() {
   showQr.value = false;
-  qrCode.value = '';
-  urlQrCode.value = '';
+  qrCode.value = "";
+  urlQrCode.value = "";
   isInfo.value = true;
 }
 
@@ -242,9 +302,9 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     await filialStore.get(0);
     const queryPage = Number(route.query.page) || 1;
-    const queryRoom = route.query.room || '';
-    const queryFilialId = route.query.filial || '';
-    const queryFilialTitle = route.query.filialTitle || 'Филиални танлаш';
+    const queryRoom = route.query.room || "";
+    const queryFilialId = route.query.filial || "";
+    const queryFilialTitle = route.query.filialTitle || "Филиални танлаш";
     pageNum.value = queryPage;
     titleRoom.value = queryRoom;
     filialId.value = queryFilialId;
@@ -254,58 +314,87 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
-
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <!-- Room Header section -->
-    <div class="flex justify-between items-center mt-16">
-      <h3 class="text-xl text-[#1814F3] font-semibold hidden lg:block">Хона</h3>
-      <div class="flex gap-4 items-center">
-
+    <div class="flex items-center justify-between sm:mt-16 lg:mt-0">
+      <h3 class="text-main hidden text-xl font-semibold lg:block">Хона</h3>
+      <div class="flex items-center gap-4">
         <!-- Filter title -->
-        <input type="text"
-          class="w-28 truncate lg:w-48 px-4 py-1.5 border rounded-md text-[#1814F3] focus:outline-none focus:border-[#1814F3] placeholder:text-[#8BA3CB]"
-          placeholder="Хона номи" v-model="titleRoom" @input="searchRoomTitle">
+        <input
+          type="text"
+          class="text-main focus:border-main w-28 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-48"
+          placeholder="Хона номи"
+          v-model="titleRoom"
+          @input="searchRoomTitle"
+        />
         <!-- /Filter title -->
 
         <!-- Filter title -->
-        <input type="text"
-          class="w-28 truncate lg:w-48 px-4 py-1.5 border rounded-md text-[#1814F3] focus:outline-none focus:border-[#1814F3] placeholder:text-[#8BA3CB]"
-          placeholder="Хона рақами" v-model="orderRoom" @input="searchRoomOrder">
+        <input
+          type="text"
+          class="text-main focus:border-main w-28 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-48"
+          placeholder="Хона рақами"
+          v-model="orderRoom"
+          @input="searchRoomOrder"
+        />
         <!-- /Filter title --
 
         <!-- Filter filial -->
-        <div class="relative w-32 lg:w-48 transition-all duration-1000">
-          <button type="button" @click="isFilial = !isFilial"
-            class="relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-6 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-[#1814F3] sm:text-sm sm:leading-6"
-            aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+        <div class="relative w-32 transition-all duration-1000 lg:w-48">
+          <button
+            type="button"
+            @click="isFilial = !isFilial"
+            class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-6 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
+            aria-haspopup="listbox"
+            aria-expanded="true"
+            aria-labelledby="listbox-label"
+          >
             <span class="flex items-center justify-between">
-              <span class=" block truncate text-[#8BA3CB]">{{ filialSelect }}</span>
-              <ChevronDownIcon class="w-4 h-4 text-[#8BA3CB] transition ease-linear duration-300 relative -right-6"
-                :class="isFilial ? 'transform rotate-180' : ''" />
+              <span class="block truncate text-[#8BA3CB]">{{
+                filialSelect
+              }}</span>
+              <ChevronDownIcon
+                class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
+                :class="isFilial ? 'rotate-180 transform' : ''"
+              />
             </span>
           </button>
-          <ul v-show="isFilial"
-            class="absolute max-h-56 z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg  ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-            tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
+          <ul
+            v-show="isFilial"
+            class="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+            tabindex="-1"
+            role="listbox"
+            aria-labelledby="listbox-label"
+            aria-activedescendant="listbox-option-3"
+          >
             <li
-              class="relative cursor-default select-none pl-3 py-1 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
-              id="listbox-option-0" role="option" @click="filterFilial({ _id: '', title: 'Барча филиаллар' })">
-              <div class="flex items-center cursor-pointer group">
+              class="relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+              id="listbox-option-0"
+              role="option"
+              @click="filterFilial({ _id: '', title: 'Барча филиаллар' })"
+            >
+              <div class="group flex cursor-pointer items-center">
                 <span
-                  class="ml-3 block truncate font-normal transition ease-linear text-[#8BA3CB] group-hover:text-[#1814F3]">
+                  class="group-hover:text-main ml-3 block truncate font-normal text-[#8BA3CB] transition ease-linear"
+                >
                   Барча филиаллар
                 </span>
               </div>
             </li>
             <li
-              class="relative cursor-default select-none pl-3 py-1 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
-              id="listbox-option-0" role="option" v-for="item in filialStore.filials" @click="filterFilial(item)">
-              <div class="flex items-center cursor-pointer group">
+              class="relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+              id="listbox-option-0"
+              role="option"
+              v-for="item in filialStore.filials"
+              @click="filterFilial(item)"
+            >
+              <div class="group flex cursor-pointer items-center">
                 <span
-                  class="ml-3 block truncate font-normal transition ease-linear text-[#8BA3CB] group-hover:text-[#1814F3]">
+                  class="group-hover:text-main ml-3 block truncate font-normal text-[#8BA3CB] transition ease-linear"
+                >
                   {{ item.title }}
                 </span>
               </div>
@@ -322,45 +411,68 @@ onMounted(async () => {
     <!-- /Room Header section -->
 
     <!-- Table Section -->
-    <div class="h-[660px] bg-white rounded-2xl py-2 overflow-auto">
-      <BaseTable :columns="columns" :data="roomStore.rooms" @delete="openDelete" @edite="handleEdite" :page="pageNum"
-        :limit="limit" @main="openInfo" />
+    <div class="h-[660px] overflow-auto rounded-2xl bg-white py-2">
+      <BaseTable
+        :columns="columns"
+        :data="roomStore.rooms"
+        @delete="openDelete"
+        @edite="handleEdite"
+        :page="pageNum"
+        :limit="limit"
+        @main="openInfo"
+      />
     </div>
     <!-- /Table section -->
 
-
-
     <!-- Pagination -->
-    <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-      <span class="flex items-center cursor-pointer" @click="prewPage">
-        <ChevronLeftIcon class="w-4 h-4" />
+    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
+      <span class="flex cursor-pointer items-center" @click="prewPage">
+        <ChevronLeftIcon class="h-4 w-4" />
       </span>
-      <span v-if="pageNum > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        :class="1 === pageNum ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1)">
+      <span
+        v-if="pageNum > 2"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        :class="1 === pageNum ? 'bg-main text-white' : ''"
+        @click="goPage(1)"
+      >
         {{ 1 }}
       </span>
       <span v-if="pageNum > 2">...</span>
-      <span v-if="pageNum > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        @click="goPage(pageNum - 1)">
+      <span
+        v-if="pageNum > 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum - 1)"
+      >
         {{ pageNum - 1 }}
       </span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-        @click="goPage(pageNum)">
+      <span
+        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+        @click="goPage(pageNum)"
+      >
         {{ pageNum }}
       </span>
-      <span v-if="pageNum < Math.ceil(roomStore.count / limit) - 1"
-        class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageNum + 1)">
+      <span
+        v-if="pageNum < Math.ceil(roomStore.count / limit) - 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum + 1)"
+      >
         {{ Number(pageNum) + 1 }}
       </span>
       <span v-if="pageNum < Math.ceil(roomStore.count / limit) - 1">...</span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+      <span
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
         v-if="Math.ceil(roomStore.count / limit) > pageNum"
-        :class="Math.ceil(roomStore.count / limit) === pageNum ? 'text-white bg-[#1814F3]' : ''"
-        @click="goPage(Math.ceil(roomStore.count / limit))">
+        :class="
+          Math.ceil(roomStore.count / limit) === pageNum
+            ? 'bg-main text-white'
+            : ''
+        "
+        @click="goPage(Math.ceil(roomStore.count / limit))"
+      >
         {{ Math.ceil(roomStore.count / limit) }}
       </span>
-      <span class="flex gap-1 items-center cursor-pointer" @click="nextPage">
-        <ChevronRightIcon class="w-4 h-4" />
+      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
+        <ChevronRightIcon class="h-4 w-4" />
       </span>
     </div>
     <!-- /Pagination-->
@@ -368,34 +480,70 @@ onMounted(async () => {
     <!-- Modal  -->
     <Teleport to="body">
       <BaseModal :show="showModal" @close="closeModal">
-        <template #header>Хона{{ form._id ? 'ни ўзгартириш' : ' яратиш' }}</template>
+        <template #header
+          >Хона{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template
+        >
         <template #body>
           <BaseForm class="grid grid-cols-2 gap-2">
-            <BaseInput v-model="form.title" label="Хона номи" placeholder="Хона номи" inputType="string" />
-            <BaseInput v-model="form.number" label="Хона рақами" placeholder="Хона рақами" inputType="number" />
-            <SelectFilial label="Филиал"
-              :placeholder="form.filial ? roomStore.roomById?.filial?.title : 'Филиални танланг'"
-              :data="filialStore.filials" v-model="form.filial" />
-            <BaseSelect label="Typи" :placeholder="form.type || 'Хона турини танланг'" :data="type"
-              v-model="form.type" />
-            <BaseSelect label="Статус" :placeholder="form.status || 'Хона статусини танланг'" :data="status"
-              v-model="form.status" />
+            <BaseInput
+              v-model="form.title"
+              label="Хона номи"
+              placeholder="Хона номи"
+              inputType="string"
+            />
+            <BaseInput
+              v-model="form.number"
+              label="Хона рақами"
+              placeholder="Хона рақами"
+              inputType="number"
+            />
+            <SelectFilial
+              label="Филиал"
+              :placeholder="
+                form.filial
+                  ? roomStore.roomById?.filial?.title
+                  : 'Филиални танланг'
+              "
+              :data="filialStore.filials"
+              v-model="form.filial"
+            />
+            <BaseSelect
+              label="Typи"
+              :placeholder="form.type || 'Хона турини танланг'"
+              :data="type"
+              v-model="form.type"
+            />
+            <BaseSelect
+              label="Статус"
+              :placeholder="form.status || 'Хона статусини танланг'"
+              :data="status"
+              v-model="form.status"
+            />
           </BaseForm>
         </template>
         <template #button>
-          <button @click="submitForm"
-            class="w-32 bg-blue-100 text-blue-600 hover:bg-blue-300 transition-all ease-linear rounded-md py-1">
+          <button
+            @click="submitForm"
+            class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300"
+          >
             Сақлаш
           </button>
         </template>
       </BaseModal>
 
       <!-- Delete Modal -->
-      <DeleteModal :show="isDelete" @close="isDelete = false" @delete="handleDelete">
+      <DeleteModal
+        :show="isDelete"
+        @close="isDelete = false"
+        @delete="handleDelete"
+      >
         <div class="flex justify-center">
-          <p class="text-gray-500"> Сиз <span class="capitalize text-red-400">
-              {{ roomStore.roomById.title }}
-            </span>ни учирмоқдасиз!</p>
+          <p class="text-gray-500">
+            Сиз
+            <span class="capitalize text-red-400">
+              {{ roomStore.roomById.title }} </span
+            >ни учирмоқдасиз!
+          </p>
         </div>
       </DeleteModal>
       <!-- /Delete Modal -->
@@ -404,47 +552,88 @@ onMounted(async () => {
       <InfoRoomModal :show="isInfo" @close="closeInfo">
         <template #header>Хона: {{ roomStore.roomById?.number }}</template>
         <template #body>
-          <div v-if="!qrCodeStore.qrCodes.length"
-            class="lg:h-[640px] overflow-auto bg-white rounded-2xl py-2 text-center text-[#1814F3]">
+          <div
+            v-if="!qrCodeStore.qrCodes.length"
+            class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[640px]"
+          >
             Бу хонага маҳсулот бириктирилмаган
           </div>
-          <div v-else class="lg:h-[660px]  overflow-auto bg-white rounded-2xl py-2">
-            <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
-              :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+          <div
+            v-else
+            class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]"
+          >
+            <qrCodeTable
+              :columns="columnsInfo"
+              :data="qrCodeStore.qrCodes"
+              :page="pageInfo"
+              :limit="12"
+              :count="qrCodeStore.count"
+              :summa="qrCodeStore.summa"
+              @download="downloadFile"
+              @showQr="showFile"
+            />
           </div>
         </template>
         <template #footer>
           <!-- Pagination -->
-          <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-            <span class="flex items-center cursor-pointer" @click="prewPage('info')">
-              <ChevronLeftIcon class="w-4 h-4" />
+          <div
+            class="text-main flex w-full items-center justify-end gap-2 px-10"
+          >
+            <span
+              class="flex cursor-pointer items-center"
+              @click="prewPage('info')"
+            >
+              <ChevronLeftIcon class="h-4 w-4" />
             </span>
-            <span v-if="pageInfo > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-              :class="1 === pageInfo ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1, 'info')">
+            <span
+              v-if="pageInfo > 2"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              :class="1 === pageInfo ? 'bg-main text-white' : ''"
+              @click="goPage(1, 'info')"
+            >
               {{ 1 }}
             </span>
             <span v-if="pageInfo > 2">...</span>
-            <span v-if="pageInfo > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-              @click="goPage(pageInfo - 1, 'info')">
+            <span
+              v-if="pageInfo > 1"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              @click="goPage(pageInfo - 1, 'info')"
+            >
               {{ pageInfo - 1 }}
             </span>
-            <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-              @click="goPage(pageInfo, 'info')">
+            <span
+              class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+              @click="goPage(pageInfo, 'info')"
+            >
               {{ pageInfo }}
             </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageInfo + 1, 'info')">
+            <span
+              v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+              @click="goPage(pageInfo + 1, 'info')"
+            >
               {{ Number(pageInfo) + 1 }}
             </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1">...</span>
-            <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
+              >...</span
+            >
+            <span
+              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
               v-if="Math.ceil(qrCodeStore.count / 12) > pageInfo"
-              :class="Math.ceil(qrCodeStore.count / 12) === pageInfo ? 'text-white bg-[#1814F3]' : ''"
-              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')">
+              :class="
+                Math.ceil(qrCodeStore.count / 12) === pageInfo
+                  ? 'bg-main text-white'
+                  : ''
+              "
+              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')"
+            >
               {{ Math.ceil(qrCodeStore.count / 12) }}
             </span>
-            <span class="flex gap-1 items-center cursor-pointer" @click="nextPage('info')">
-              <ChevronRightIcon class="w-4 h-4" />
+            <span
+              class="flex cursor-pointer items-center gap-1"
+              @click="nextPage('info')"
+            >
+              <ChevronRightIcon class="h-4 w-4" />
             </span>
           </div>
           <!-- /Pagination-->
@@ -456,8 +645,8 @@ onMounted(async () => {
       <BaseModal :show="showQr" @close="closeFileModal">
         <template #header>Қр Код: {{ qrCode }} </template>
         <template #body>
-          <div class="flex justify-center items-center p-20">
-            <img class="w-64 h-64" :src="urlQrCode" alt="Qr Code">
+          <div class="flex items-center justify-center p-20">
+            <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
           </div>
         </template>
       </BaseModal>

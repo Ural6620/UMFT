@@ -1,14 +1,18 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { saveAs } from 'file-saver';
-import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { saveAs } from "file-saver";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
-import { ArrowDownOnSquareStackIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/solid";
+import {
+  ArrowDownOnSquareStackIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/vue/24/solid";
 import api from "@/plugins/axios";
-import JSZip from 'jszip'
+import JSZip from "jszip";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import SelectFilial from "@/components/form/SelectFilial.vue";
@@ -20,12 +24,12 @@ const qrCodeStore = useQrCodeStore();
 const roomStore = useRoomStore();
 const productStore = useProductStore();
 const showModal = ref(false);
-const urlQrCode = ref('');
-const qrCode = ref('');
+const urlQrCode = ref("");
+const qrCode = ref("");
 const pageNum = ref(1);
 const limit = 12;
-const orderRoom = ref('');
-const titleProduct = ref('');
+const orderRoom = ref("");
+const titleProduct = ref("");
 const columns = [
   { name: "№" },
   { name: "Маҳсулот" },
@@ -46,9 +50,9 @@ async function downloadFile(item) {
     }
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = blobUrl;
-    link.download = item.split('/').pop();
+    link.download = item.split("/").pop();
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -73,8 +77,8 @@ async function downloadAllFiles() {
       folder.file(`${item._id}.png`, blob);
     });
     await Promise.all(downloadPromises);
-    const content = await zip.generateAsync({ type: 'blob' });
-    saveAs(content, 'qr_codes.zip');
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "qr_codes.zip");
   } catch (error) {
     console.error("Fayllarni yuklashda xatolik yuz berdi:", error);
   }
@@ -97,19 +101,27 @@ async function showFile(item) {
 }
 
 function closeFileModal() {
-  urlQrCode.value = '';
-  qrCode.value = '';
+  urlQrCode.value = "";
+  qrCode.value = "";
   showModal.value = false;
 }
 
 async function searchCode() {
   pageNum.value = 1;
-  await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value, orderRoom.value);
+  await qrCodeStore.getAll(
+    limit,
+    pageNum.value,
+    titleProduct.value,
+    orderRoom.value,
+  );
 }
 
 async function goPage(n) {
   pageNum.value = n;
-  await router.push({ name: "qrCode", query: { page: pageNum.value, code: titleProduct.value } });
+  await router.push({
+    name: "qrCode",
+    query: { page: pageNum.value, code: titleProduct.value },
+  });
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
 }
 
@@ -125,7 +137,7 @@ async function nextPage() {
   if (pageNum.value < maxPage) {
     pageNum.value++;
   }
-  goPage(pageNum.value)
+  goPage(pageNum.value);
 }
 
 onMounted(async () => {
@@ -134,37 +146,50 @@ onMounted(async () => {
     const queryPage = route.query.page || 1;
     const queryTitle = route.query.code;
     pageNum.value = Number(queryPage) || 1;
-    titleProduct.value = queryTitle || '';
-    await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value)
+    titleProduct.value = queryTitle || "";
+    await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
     await roomStore.get(0);
     await productStore.get(0);
   } else {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
-})
+});
 </script>
 <template>
   <div class="flex flex-col gap-4">
     <!-- Header Product -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl text-[#1814F3] font-semibold">Қр Код</h3>
-      <div class="flex gap-4 items-center">
-
+    <div class="flex items-center justify-between">
+      <h3 class="text-main text-xl font-semibold">Қр Код</h3>
+      <div class="flex items-center gap-4">
         <!-- Filter Product -->
-        <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="col-span-3"
-          v-model="titleProduct" @update:modelValue="searchCode" classes="w-32 lg:w-52" />
+        <SelectFilial
+          placeholder="Маҳсулотни танланг"
+          :data="productStore.products"
+          class="col-span-3"
+          v-model="titleProduct"
+          @update:modelValue="searchCode"
+          classes="w-32 lg:w-52"
+        />
         <!-- /Filter Product -->
 
         <!-- Filter Room -->
-        <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="col-span-3" v-model="orderRoom"
-          @update:modelValue="searchCode" classes="w-32 lg:w-52" />
+        <SelectFilial
+          placeholder="Хонани танланг"
+          :data="roomStore.rooms"
+          class="col-span-3"
+          v-model="orderRoom"
+          @update:modelValue="searchCode"
+          classes="w-32 lg:w-52"
+        />
         <!-- /Filter Room -->
 
         <!-- Download all qrCode -->
-        <div class=" flex items-center gap-4 justify-end">
-          <button @click.prevent="downloadAllFiles()"
-            class="p-2 transition ease-linear bg-yellow-100 hover:bg-yellow-300 rounded justify-center items-center gap-1 inline-flex">
-            <ArrowDownOnSquareStackIcon class="text-yellow-600 w-3.5 h-3.5" />
+        <div class="flex items-center justify-end gap-4">
+          <button
+            @click.prevent="downloadAllFiles()"
+            class="inline-flex items-center justify-center gap-1 rounded bg-yellow-100 p-2 transition ease-linear hover:bg-yellow-300"
+          >
+            <ArrowDownOnSquareStackIcon class="h-3.5 w-3.5 text-yellow-600" />
           </button>
         </div>
         <!-- /Download all qrCode -->
@@ -173,43 +198,69 @@ onMounted(async () => {
     <!-- /Header Product -->
 
     <!-- Table -->
-    <div class="lg:h-[640px] overflow-auto bg-white rounded-2xl py-2">
-      <qrCodeTable :columns="columns" :data="qrCodeStore.qrCodes" :page="pageNum" :limit="limit"
-        @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
+    <div class="overflow-auto rounded-2xl bg-white py-2 lg:h-[640px]">
+      <qrCodeTable
+        :columns="columns"
+        :data="qrCodeStore.qrCodes"
+        :page="pageNum"
+        :limit="limit"
+        @download="downloadFile"
+        @showQr="showFile"
+        :count="qrCodeStore.count"
+        :summa="qrCodeStore.summa"
+      />
     </div>
     <!-- /Table -->
 
     <!-- Pagination -->
-    <div class="w-full flex items-center justify-end px-10 gap-2 text-[#1814F3]">
-      <span class="flex items-center cursor-pointer" @click="prewPage">
-        <ChevronLeftIcon class="w-4 h-4" />
+    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
+      <span class="flex cursor-pointer items-center" @click="prewPage">
+        <ChevronLeftIcon class="h-4 w-4" />
       </span>
-      <span v-if="pageNum > 2" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        :class="1 === pageNum ? 'text-white bg-[#1814F3]' : ''" @click="goPage(1)">
+      <span
+        v-if="pageNum > 2"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        :class="1 === pageNum ? 'bg-main text-white' : ''"
+        @click="goPage(1)"
+      >
         {{ 1 }}
       </span>
       <span v-if="pageNum > 2">...</span>
-      <span v-if="pageNum > 1" class="cursor-pointer transition-all ease-linear px-2 rounded-md"
-        @click="goPage(pageNum - 1)">
+      <span
+        v-if="pageNum > 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum - 1)"
+      >
         {{ pageNum - 1 }}
       </span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md text-white bg-[#1814F3]"
-        @click="goPage(pageNum)">
+      <span
+        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
+        @click="goPage(pageNum)"
+      >
         {{ pageNum }}
       </span>
-      <span v-if="pageNum < Math.ceil(qrCodeStore.count / limit) - 1"
-        class="cursor-pointer transition-all ease-linear px-2 rounded-md" @click="goPage(pageNum + 1)">
+      <span
+        v-if="pageNum < Math.ceil(qrCodeStore.count / limit) - 1"
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
+        @click="goPage(pageNum + 1)"
+      >
         {{ Number(pageNum) + 1 }}
       </span>
       <span v-if="pageNum < Math.ceil(qrCodeStore.count / limit) - 1">...</span>
-      <span class="cursor-pointer transition-all ease-linear px-2 rounded-md"
+      <span
+        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
         v-if="Math.ceil(qrCodeStore.count / limit) > pageNum"
-        :class="Math.ceil(qrCodeStore.count / limit) === pageNum ? 'text-white bg-[#1814F3]' : ''"
-        @click="goPage(Math.ceil(qrCodeStore.count / limit))">
+        :class="
+          Math.ceil(qrCodeStore.count / limit) === pageNum
+            ? 'bg-main text-white'
+            : ''
+        "
+        @click="goPage(Math.ceil(qrCodeStore.count / limit))"
+      >
         {{ Math.ceil(qrCodeStore.count / limit) }}
       </span>
-      <span class="flex gap-1 items-center cursor-pointer" @click="nextPage">
-        <ChevronRightIcon class="w-4 h-4" />
+      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
+        <ChevronRightIcon class="h-4 w-4" />
       </span>
     </div>
     <!-- /Pagination-->
@@ -219,8 +270,8 @@ onMounted(async () => {
       <BaseModal :show="showModal" @close="closeFileModal">
         <template #header>Қр Код: {{ qrCode }} </template>
         <template #body>
-          <div class="flex justify-center items-center p-20">
-            <img class="w-64 h-64" :src="urlQrCode" alt="Qr Code">
+          <div class="flex items-center justify-center p-20">
+            <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
           </div>
         </template>
       </BaseModal>
