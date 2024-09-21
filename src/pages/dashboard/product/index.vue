@@ -30,7 +30,6 @@ const showQr = ref(false);
 const pageNum = ref(1);
 const pageInfo = ref(1);
 const productId = ref('');
-const orderRoom = ref('');
 const titleProduct = ref('');
 const qrCode = ref('');
 const urlQrCode = ref('');
@@ -137,8 +136,8 @@ async function goPage(n, item) {
     await qrCodeStore.getAll(12, pageInfo.value, productId.value, '');
   } else {
     pageNum.value = n;
-    router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+    router.push({ name: 'product', query: { page: pageNum.value, product: titleProduct.value } });
+    await productStore.get(limit, pageNum.value, titleProduct.value);
   }
 }
 
@@ -163,7 +162,7 @@ async function nextPage(item) {
     }
     await qrCodeStore.getAll(12, pageInfo.value, productId.value, '');
   } else {
-    const maxPage = Math.ceil(roomStore.count / limit);
+    const maxPage = Math.ceil(productStore.count / limit);
     if (pageNum.value < maxPage) {
       pageNum.value++;
     }
@@ -230,7 +229,6 @@ function closeInfo() {
   pageInfo.value = 1;
   isInfo.value = false;
 }
-
 
 onMounted(async () => {
   await authStore.checkAuth();
@@ -308,7 +306,6 @@ onMounted(async () => {
       </span>
     </div>
     <!-- /Pagination-->
-
 
     <!-- Modal -->
     <Teleport to="body">

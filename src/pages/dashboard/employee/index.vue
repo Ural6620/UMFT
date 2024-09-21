@@ -123,8 +123,8 @@ async function goPage(n, item) {
     await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', empoyeeId.value);
   } else {
     pageNum.value = n;
-    router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+    router.push({ name: "employee", query: { page: pageNum.value, employee: titleEmployee.value } });
+    await employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.value);
   }
 }
 
@@ -271,7 +271,7 @@ onMounted(async () => {
     <!-- <pre>{{ employeeStore.departments }}</pre> -->
 
     <!-- Table -->
-    <div class="lg:h-[640px] overflow-auto bg-white rounded-2xl py-2">
+    <div class="lg:h-[660px] overflow-auto bg-white rounded-2xl py-2">
       <EmployeeTable :columns="columns" :data="employeeStore.employees" :page="pageNum" :limit="limit"
         @edite="openModal" @main="openInfo" />
     </div>

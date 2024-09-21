@@ -117,8 +117,8 @@ async function goPage(n, item) {
     await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
   } else {
     pageNum.value = n;
-    router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+    await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
+    await categoryStore.get(limit, pageNum.value, titleCategory.value)
   }
 }
 
@@ -143,7 +143,7 @@ async function nextPage(item) {
     }
     await qrCodeStore.getAll(12, pageInfo.value, '', '', '', '', '', categoryId.value);
   } else {
-    const maxPage = Math.ceil(roomStore.count / limit);
+    const maxPage = Math.ceil(categoryStore.count / limit);
     if (pageNum.value < maxPage) {
       pageNum.value++;
     }
@@ -154,7 +154,7 @@ async function nextPage(item) {
 async function searchCategory() {
   pageNum.value = 1;
   await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
-  await categoryStore.get(limit, pageNum.value, titleCategory.value);
+  await categoryStore.get(limit, pageNum.value, titleCategory.value)
 }
 
 async function openInfo(id) {
@@ -218,6 +218,7 @@ onMounted(async () => {
     const queryTitle = route.query.title;
     pageNum.value = Number(queryPage) || 1;
     titleCategory.value = queryTitle || '';
+    await router.push({ name: "category", query: { page: pageNum.value, title: titleCategory.value } });
     await categoryStore.get(limit, pageNum.value, titleCategory.value)
   } else {
     console.error("Autentifikatsiya muvaffaqiyatsiz");

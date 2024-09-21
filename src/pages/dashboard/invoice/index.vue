@@ -230,15 +230,14 @@ function invoiceSum(invoice) {
   return sum;
 }
 
-
 async function goPage(n, item) {
   if (item === 'info') {
     pageInfo.value = n;
     await qrCodeStore.getAll(12, pageInfo.value, '', '', '', invoiceId.value);
   } else {
     pageNum.value = n;
-    router.push({ name: "rooms", query: { page: pageNum.value, room: titleRoom.value, filial: filialId.value } });
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value, orderRoom.value);
+    router.push({ name: 'invoice', query: { page: pageNum.value, invoice: titleInvoice.value } });
+    invoiceStore.get(limit, pageNum.value, titleInvoice.value);
   }
 }
 
@@ -263,7 +262,7 @@ async function nextPage(item) {
     }
     await qrCodeStore.getAll(12, pageInfo.value, '', '', '', invoiceId.value);
   } else {
-    const maxPage = Math.ceil(roomStore.count / limit);
+    const maxPage = Math.ceil(invoiceStore.count / limit);
     if (pageNum.value < maxPage) {
       pageNum.value++;
     }
