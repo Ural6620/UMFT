@@ -141,18 +141,13 @@ function clear() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    const queryPage = route.query.page || 1;
-    const queryTitle = route.query.code;
-    pageNum.value = Number(queryPage) || 1;
-    titleProduct.value = queryTitle || "";
-    await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
-    await roomStore.get(0);
-    await productStore.get(0);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  const queryPage = route.query.page || 1;
+  const queryTitle = route.query.code;
+  pageNum.value = Number(queryPage) || 1;
+  titleProduct.value = queryTitle || "";
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
+  await roomStore.get(0);
+  await productStore.get(0);
 });
 </script>
 <template>

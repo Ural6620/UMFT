@@ -6,13 +6,11 @@ import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon, EyeIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import EmployeeTable from "@/components/table/EmployeeTable.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
-import SelectFilial from "@/components/form/SelectFilial.vue";
-import SelectQrCode from "@/components/form/selectQrCode.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
 import SelectDepartment from "@/components/form/SelectDepartment.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
@@ -20,6 +18,7 @@ import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
+import BaseInput from "@/components/form/BaseInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -339,24 +338,21 @@ onMounted(async () => {
         <BaseForm>
           <div class="col-span-4 flex max-h-96 flex-col items-end">
             <div class="grid w-full grid-cols-11 gap-4 font-semibold text-[#718EBF]">
+              <h4 class="col-span-1">Синхрон</h4>
               <h4 class="col-span-3">Маҳсулот</h4>
               <h4 class="col-span-3">Хона</h4>
-              <h4 class="col-span-1">Синхрон</h4>
               <h4 class="col-span-3">Қр Код</h4>
             </div>
             <div v-for="item in form.inventories" class="grid w-full grid-cols-11 items-center gap-4">
-              <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="col-span-3"
-                v-model="item.product" />
-              <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="col-span-3"
-                v-model="item.room" />
-              <div class="col-span-1 mb-2 flex items-center">
-                <button @click.prevent="synchron(item.product, item.room)"
-                  class="inline-flex items-center justify-center gap-1 rounded bg-yellow-100 p-2 transition ease-linear hover:bg-yellow-300">
-                  <ArrowPathIcon class="relative h-3.5 w-3.5 text-yellow-600" />
-                </button>
+              <div class="col-span-1 flex items-center">
+                <BaseButton @click.prevent="synchron(item.product, item.room)" color="green">
+                  <EyeIcon class="relative h-3.5 w-3.5" />
+                </BaseButton>
               </div>
-              <SelectQrCode placeholder="Қр Кодни танланг" :data="qrCodeStore.qrCodes" class="col-span-3"
-                v-model="item._id" />
+              <BaseInput placeholder="Маҳсулот" :data="productStore.products" class="col-span-3"
+                v-model="item.product" />
+              <BaseInput placeholder="Хона" :data="roomStore.rooms" class="col-span-3" v-model="item.room" />
+              <BaseInput placeholder="Қр Код" :data="qrCodeStore.qrCodes" class="col-span-3" v-model="item._id" />
               <div class="col-span-1 mb-2 flex items-center">
                 <button @click.prevent="removeInvoice(item)"
                   class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
