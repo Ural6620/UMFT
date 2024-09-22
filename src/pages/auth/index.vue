@@ -17,6 +17,7 @@ const form = reactive({
 
 const submitForm = async () => {
   if (form.login && form.password) {
+    console.log(form)
     await authStore.login({
       login: form.login,
       password: form.password,
@@ -44,23 +45,11 @@ onMounted(async () => {
       <div class="text-center text-[36px] font-bold text-white">
         Инвентаризация
       </div>
-      <form
-        @submit.prevent="submitForm"
-        class="flex h-auto w-96 flex-col items-center gap-4 rounded-md bg-white p-8 py-10 shadow-md"
-      >
-        <BaseInput
-          label="Логин"
-          placeholder="Логинингизни киритинг"
-          input-type="text"
-          v-model="form.login"
-        />
-        <PasswordInput
-          label="Парол"
-          placeholder="Паролингизни киритинг"
-          input-type="password"
-          v-model="form.password"
-          :icon="EyeIcon"
-        />
+      <form @submit.prevent="submitForm"
+        class="flex h-auto w-96 flex-col items-center gap-4 rounded-md bg-white p-8 py-10 shadow-md">
+        <BaseInput label="Логин" placeholder="Логинингизни киритинг" input-type="text" v-model="form.login" />
+        <PasswordInput label="Парол" placeholder="Паролингизни киритинг" input-type="password" v-model="form.password"
+          :icon="EyeIcon" />
         <button class="btn-primary" type="submit">Кириш</button>
       </form>
     </div>

@@ -6,12 +6,7 @@ import { useProductStore } from "@/stores/product";
 import { useRoomStore } from "@/stores/room";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoute, useRouter } from "vue-router";
-import {
-  TrashIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ArrowDownOnSquareIcon,
-} from "@heroicons/vue/24/solid";
+import { TrashIcon, ArchiveBoxXMarkIcon, ArchiveBoxArrowDownIcon, ArrowDownOnSquareIcon, PlusIcon } from "@heroicons/vue/24/solid";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
 import DeleteModal from "@/components/ui/DeleteModal.vue";
@@ -24,6 +19,8 @@ import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import api from "@/plugins/axios";
+import Pagination from "@/components/ui/Pagination.vue";
+import { colInvoice } from "@/components/constants/constants";
 
 const route = useRoute();
 const router = useRouter();
@@ -44,28 +41,6 @@ const pageNum = ref(1);
 const titleInvoice = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
-
-const columns = [
-  { name: "№" },
-  { name: "Рақами" },
-  { name: "Тавсифи" },
-  { name: "Сони" },
-  { name: "Суммаси" },
-  { name: "Статуси" },
-  { name: "Файллари" },
-  { name: "" },
-];
-
-const columnsInfo = [
-  { name: "№" },
-  { name: "Маҳсулот" },
-  { name: "Модел" },
-  { name: "Фактура" },
-  { name: "Хона" },
-  { name: "Ходим" },
-  { name: "Нарҳ" },
-  { name: "" },
-];
 
 const form = reactive({
   title: "",
@@ -284,7 +259,17 @@ async function nextPage(item) {
   }
 }
 
-function searchInvoice() {
+function filter() {
+  pageNum.value = 1;
+  router.push({
+    name: "invoice",
+    query: { page: 1, invoice: titleInvoice.value },
+  });
+  invoiceStore.get(limit, pageNum.value, titleInvoice.value);
+}
+
+function clear() {
+  titleInvoice.value = "";
   pageNum.value = 1;
   router.push({
     name: "invoice",
@@ -324,7 +309,7 @@ async function showFile(item) {
   showQr.value = true;
   isInfo.value = false;
   try {
-    const fileUrl = `http://195.158.9.124:4101/files/qrcode/${item}.png`;
+    const fileUrl = `${api.defaults.baseURL}/files/qrcode/${item}.png`;
     const response = await fetch(fileUrl);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -363,428 +348,206 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <!-- Header Product -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
-      <div class="flex items-center gap-4">
-        <!-- Filter title -->
-        <input
-          type="number"
-          class="text-main focus:border-main w-44 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-          placeholder="Фактура рақами"
-          v-model="titleInvoice"
-          @input="searchInvoice"
-        />
-        <!-- /Filter title -->
+  <!-- Header Product -->
+  <div class="flex items-center justify-between pb-4">
+    <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
+    <div class="flex items-center gap-4">
+      <!-- Filter title -->
+      <input type="number"
+        class="text-main focus:border-main w-44 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        placeholder="Фактура рақами" v-model="titleInvoice" />
+      <!-- /Filter title -->
 
-        <BaseButton @click="openModal" class="text-main"> Яратиш </BaseButton>
-      </div>
+      <BaseButton @click="filter" color="blue">
+        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red">
+        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="showModal = true" color="green">
+        <PlusIcon class="h-4 w-4" />
+      </BaseButton>
     </div>
-    <!-- /Header Product -->
+  </div>
+  <!-- /Header Product -->
 
-    <!-- Table -->
-    <div class="h-[600px] overflow-auto rounded-2xl bg-white py-2">
-      <InvoiceTable
-        :columns="columns"
-        :data="invoiceStore.invoices"
-        @edite="handleEdite"
-        @delete="openDelete"
-        @download="openFileModal"
-        :page="pageNum"
-        :limit="limit"
-        @main="openInfo"
-      />
-    </div>
-    <!-- /Table -->
+  <!-- Table -->
+  <div class="flex-1 overflow-auto rounded-2xl bg-white py-2">
+    <InvoiceTable :columns="colInvoice" :data="invoiceStore.invoices" @edite="handleEdite" @delete="openDelete"
+      @download="openFileModal" :page="pageNum" :limit="limit" @main="openInfo" />
+  </div>
+  <!-- /Table -->
 
-    <!-- Pagination -->
-    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
-      <span class="flex cursor-pointer items-center" @click="prewPage">
-        <ChevronLeftIcon class="h-4 w-4" />
-      </span>
-      <span
-        v-if="pageNum > 2"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        :class="1 === pageNum ? 'bg-main text-white' : ''"
-        @click="goPage(1)"
-      >
-        {{ 1 }}
-      </span>
-      <span v-if="pageNum > 2">...</span>
-      <span
-        v-if="pageNum > 1"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        @click="goPage(pageNum - 1)"
-      >
-        {{ pageNum - 1 }}
-      </span>
-      <span
-        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
-        @click="goPage(pageNum)"
-      >
-        {{ pageNum }}
-      </span>
-      <span
-        v-if="pageNum < Math.ceil(invoiceStore.count / limit) - 1"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        @click="goPage(pageNum + 1)"
-      >
-        {{ Number(pageNum) + 1 }}
-      </span>
-      <span v-if="pageNum < Math.ceil(invoiceStore.count / limit) - 1"
-        >...</span
-      >
-      <span
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        v-if="Math.ceil(invoiceStore.count / limit) > pageNum"
-        :class="
-          Math.ceil(invoiceStore.count / limit) === pageNum
-            ? 'bg-main text-white'
-            : ''
-        "
-        @click="goPage(Math.ceil(invoiceStore.count / limit))"
-      >
-        {{ Math.ceil(invoiceStore.count / limit) }}
-      </span>
-      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
-        <ChevronRightIcon class="h-4 w-4" />
-      </span>
-    </div>
-    <!-- /Pagination-->
+  <!-- Pagination -->
+  <Pagination :page="pageNum" :limit="limit" :data="invoiceStore" @next="nextPage" @prew="prewPage" @goPage="goPage" />
+  <!-- /Pagination-->
 
-    <!-- Modal -->
-    <Teleport to="body">
-      <!-- /Invoice Modal -->
-      <InvoiceModal :show="showModal" @close="closeModal">
-        <template #header>
-          Счёт фактура{{ form._id ? "ни узгартириш" : " Яратиш" }}
-        </template>
-        <!-- Edite Modal -->
-        <template v-if="form._id" #body>
-          <BaseForm @submit.prevent="submitForm">
-            <div class="col-span-4 flex max-h-96 flex-col items-end">
-              <div
-                class="grid w-full grid-cols-10 gap-4 font-semibold text-[#718EBF]"
-              >
-                <h4 class="col-span-3">Маҳсулот</h4>
-                <h4 class="col-span-3">Хона</h4>
-                <h4 class="col-span-3">Сони</h4>
-              </div>
-              <div
-                v-for="item in formEdite"
-                class="grid w-full grid-cols-10 items-center gap-4"
-              >
-                <SelectFilial
-                  placeholder="Маҳсулотни танланг"
-                  :data="productStore.products"
-                  class="col-span-3"
-                  v-model="item.product"
-                />
-                <SelectFilial
-                  placeholder="Хонани танланг"
-                  :data="roomStore.rooms"
-                  class="col-span-3"
-                  v-model="item.room"
-                />
-                <BaseInput
-                  placeholder="Сони"
-                  inputType="number"
-                  class="col-span-3"
-                  v-model="item.count"
-                />
-                <div class="col-span-1 mb-2 flex items-center">
-                  <button
-                    @click.prevent="deleteInvoiceEdite(item)"
-                    class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300"
-                  >
-                    <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-                  </button>
-                </div>
-              </div>
-              <button
-                @click.prevent="addInvoice('formEdite')"
-                class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300"
-              >
-                <span class="relative text-2xl text-blue-600">+</span>
-              </button>
+  <!-- Modal -->
+  <Teleport to="body">
+    <!-- /Invoice Modal -->
+    <InvoiceModal :show="showModal" @close="closeModal">
+      <template #header>
+        Счёт фактура{{ form._id ? "ни узгартириш" : " Яратиш" }}
+      </template>
+      <!-- Edite Modal -->
+      <template v-if="form._id" #body>
+        <BaseForm @submit.prevent="submitForm">
+          <div class="col-span-4 flex max-h-96 flex-col items-end">
+            <div class="grid w-full grid-cols-10 gap-4 font-semibold text-[#718EBF]">
+              <h4 class="col-span-3">Маҳсулот</h4>
+              <h4 class="col-span-3">Хона</h4>
+              <h4 class="col-span-3">Сони</h4>
             </div>
-          </BaseForm>
-        </template>
-        <!-- /Edite Modal -->
-
-        <!-- Add Modal -->
-        <template v-else #body>
-          <BaseForm class="grid grid-cols-4" @submit.prevent="submitForm">
-            <div class="col-span-4 grid grid-cols-2 items-center gap-x-4">
-              <BaseInput
-                v-model="form.title"
-                label="Фактура рақами"
-                placeholder="Фактура рақами"
-                inputType="number"
-              />
-              <BaseInput
-                v-model="form.description"
-                label="Тавсиф"
-                placeholder="Тавсиф"
-                inputType="string"
-              />
-              <BaseInput
-                v-model="form.model"
-                label="Модел"
-                placeholder="Модел"
-                inputType="string"
-              />
-              <BaseInput
-                label="Файл"
-                placeholder="Файл"
-                inputType="file"
-                @change="handleFile"
-              />
-            </div>
-            <h6
-              v-if="form.file.length > 0"
-              class="col-span-4 mb-2 text-xl font-semibold text-[#718EBF]"
-            >
-              Файллар
-            </h6>
-            <ol
-              v-if="form.file.length > 0"
-              class="col-span-4 flex flex-col gap-1 rounded border p-2"
-            >
-              <li
-                class="col-span-4 flex items-center gap-4 pl-2"
-                v-for="item in form.file"
-              >
-                <p class="text-[#718EBF]">{{ item }}</p>
-                <button
-                  @click.prevent="deleteFile(item)"
-                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300"
-                >
+            <div v-for="item in formEdite" class="grid w-full grid-cols-10 gap-4 items-baseline">
+              <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="col-span-3"
+                v-model="item.product" />
+              <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="col-span-3"
+                v-model="item.room" />
+              <BaseInput placeholder="Сони" inputType="number" class="col-span-3" v-model="item.count" />
+              <div class="col-span-1 mb-2 flex items-center">
+                <button @click.prevent="deleteInvoiceEdite(item)"
+                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
                   <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
                 </button>
-              </li>
-            </ol>
-            <h6 class="col-span-4 mb-4 text-xl font-semibold text-[#718EBF]">
-              Счёт фактура қўшиш
-            </h6>
-            <div
-              class="col-span-4 flex max-h-96 flex-col items-end overflow-y-auto pb-20"
-            >
-              <div
-                class="grid w-full grid-cols-9 gap-4 font-semibold text-[#718EBF]"
-              >
-                <h4 class="col-span-2">Маҳсулот</h4>
-                <h4 class="col-span-2">Сони</h4>
-                <h4 class="col-span-2">Нарҳи</h4>
-                <h4 class="col-span-2">Жами</h4>
               </div>
-              <div
-                v-for="invoice in form.invoicepack"
-                :data="invoice"
-                class="grid w-full grid-cols-9 items-center gap-4"
-              >
-                <SelectFilial
-                  placeholder="Маҳсулотни танланг"
-                  :data="productStore.products"
-                  v-model="invoice.product"
-                  class="col-span-2"
-                  classes="w-full"
-                />
-                <BaseInput
-                  placeholder="Сони"
-                  inputType="number"
-                  v-model="invoice.count"
-                  class="col-span-2"
-                />
-                <BaseInput
-                  placeholder="Нарҳи"
-                  inputType="number"
-                  v-model="invoice.per_price"
-                  class="col-span-2"
-                />
-                <span
-                  class="text-main col-span-2 mb-2 flex w-full items-center rounded-md border border-[#8BA3CB] px-2 py-1.5"
-                >
-                  {{ invoiceSum(invoice) }}
-                </span>
-                <div class="col-span-1 mb-2 flex items-center">
-                  <button
-                    @click.prevent="deleteInvoice(invoice)"
-                    class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300"
-                  >
-                    <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-                  </button>
-                </div>
-              </div>
-              <button
-                @click.prevent="addInvoice('form')"
-                class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300"
-              >
-                <span class="relative text-2xl text-blue-600"> +</span>
-              </button>
             </div>
-          </BaseForm>
-        </template>
-        <!-- /Add Modal -->
-        <template #button>
-          <button
-            @click="submitForm"
-            class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300"
-          >
-            Сақлаш
-          </button>
-        </template>
-      </InvoiceModal>
-      <!-- /Invoice Modal -->
-
-      <!-- File Modal -->
-      <FileModal :show="isFile" @close="closeInvoiceFileModal">
-        <p v-if="form.file.length === 0" class="text-[#718EBF]">
-          Файл бириктирилмаган
-        </p>
-        <ul v-else>
-          <li
-            class="flex items-center gap-4"
-            v-for="item in form.file"
-            :data="item"
-          >
-            <p class="text-[#718EBF]">{{ item }}</p>
-            <button
-              @click.prevent="downloadInvoiceFile(item)"
-              class="inline-flex items-center justify-center gap-1 rounded bg-yellow-100 p-2 transition ease-linear hover:bg-yellow-300"
-            >
-              <ArrowDownOnSquareIcon class="h-3.5 w-3.5 text-yellow-600" />
+            <button @click.prevent="addInvoice('formEdite')"
+              class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
+              <span class="relative text-2xl text-blue-600">+</span>
             </button>
-          </li>
-        </ul>
-      </FileModal>
-      <!-- /File Modal -->
+          </div>
+        </BaseForm>
+      </template>
+      <!-- /Edite Modal -->
 
-      <!-- Delete Modal -->
-      <DeleteModal
-        :show="isDelete"
-        @close="isDelete = false"
-        @delete="handleDelete"
-      >
-        <div class="flex justify-center">
-          <p class="text-gray-500">
-            Сиз
-            <span class="capitalize text-red-400">{{
-              invoiceStore.invoiceById?.title
-            }}</span>
-            рақамли фактурани ўчирмоқдасиз!
-          </p>
+      <!-- Add Modal -->
+      <template v-else #body>
+        <BaseForm class="grid grid-cols-4" @submit.prevent="submitForm">
+          <div class="col-span-4 grid grid-cols-2 items-center gap-x-4">
+            <BaseInput v-model="form.title" label="Фактура рақами" placeholder="Фактура рақами" inputType="number" />
+            <BaseInput v-model="form.description" label="Тавсиф" placeholder="Тавсиф" inputType="string" />
+            <BaseInput v-model="form.model" label="Модел" placeholder="Модел" inputType="string" />
+            <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" />
+          </div>
+          <h6 v-if="form.file.length > 0" class="col-span-4 mb-2 text-xl font-semibold text-[#718EBF]">
+            Файллар
+          </h6>
+          <ol v-if="form.file.length > 0" class="col-span-4 flex flex-col gap-1 rounded border p-2">
+            <li class="col-span-4 flex items-center gap-4 pl-2" v-for="item in form.file">
+              <p class="text-[#718EBF]">{{ item }}</p>
+              <button @click.prevent="deleteFile(item)"
+                class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
+                <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
+              </button>
+            </li>
+          </ol>
+          <h6 class="col-span-4 mb-4 text-xl font-semibold text-[#718EBF]">
+            Счёт фактура қўшиш
+          </h6>
+          <div class="col-span-4 flex max-h-96 flex-col items-end overflow-y-auto pb-20">
+            <div class="grid w-full grid-cols-9 gap-4 font-semibold text-[#718EBF]">
+              <h4 class="col-span-2">Маҳсулот</h4>
+              <h4 class="col-span-2">Сони</h4>
+              <h4 class="col-span-2">Нарҳи</h4>
+              <h4 class="col-span-2">Жами</h4>
+            </div>
+            <div v-for="invoice in form.invoicepack" :data="invoice"
+              class="grid w-full grid-cols-9 items-baseline gap-4">
+              <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" v-model="invoice.product"
+                class="col-span-2" classes="w-full" />
+              <BaseInput placeholder="Сони" inputType="number" v-model="invoice.count" class="col-span-2" />
+              <BaseInput placeholder="Нарҳи" inputType="number" v-model="invoice.per_price" class="col-span-2" />
+              <span
+                class="text-main col-span-2 mb-2 flex w-full items-center rounded-md border border-[#8BA3CB] px-2 py-1.5">
+                {{ invoiceSum(invoice) }}
+              </span>
+              <div class="col-span-1 mb-2 flex items-center">
+                <button @click.prevent="deleteInvoice(invoice)"
+                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
+                  <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
+                </button>
+              </div>
+            </div>
+            <button @click.prevent="addInvoice('form')"
+              class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
+              <span class="relative text-2xl text-blue-600"> +</span>
+            </button>
+          </div>
+        </BaseForm>
+      </template>
+      <!-- /Add Modal -->
+      <template #button>
+        <button @click="submitForm"
+          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
+          Сақлаш
+        </button>
+      </template>
+    </InvoiceModal>
+    <!-- /Invoice Modal -->
+
+    <!-- File Modal -->
+    <FileModal :show="isFile" @close="closeInvoiceFileModal">
+      <p v-if="form.file.length === 0" class="text-[#718EBF]">
+        Файл бириктирилмаган
+      </p>
+      <ul v-else>
+        <li class="flex items-center gap-4" v-for="item in form.file" :data="item">
+          <p class="text-[#718EBF]">{{ item }}</p>
+          <button @click.prevent="downloadInvoiceFile(item)"
+            class="inline-flex items-center justify-center gap-1 rounded bg-yellow-100 p-2 transition ease-linear hover:bg-yellow-300">
+            <ArrowDownOnSquareIcon class="h-3.5 w-3.5 text-yellow-600" />
+          </button>
+        </li>
+      </ul>
+    </FileModal>
+    <!-- /File Modal -->
+
+    <!-- Delete Modal -->
+    <DeleteModal :show="isDelete" @close="isDelete = false" @delete="handleDelete">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            invoiceStore.invoiceById?.title
+          }}</span>
+          рақамли фактурани ўчирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete Modal -->
+
+    <!-- Info Modal -->
+    <InfoRoomModal :show="isInfo" @close="closeInfo">
+      <template #header>Счёт фактура: {{ invoiceStore.invoiceById?.title }}</template>
+      <template #body>
+        <div v-if="!qrCodeStore.qrCodes.length"
+          class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[660px]">
+          Бу хонага маҳсулот бириктирилмаган
         </div>
-      </DeleteModal>
-      <!-- /Delete Modal -->
+        <div v-else class="overflow-auto rounded-2xl bg-white py-2 lg:h-[640px]">
+          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+            @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
+        </div>
+      </template>
+      <template #footer>
+        <!-- Pagination -->
+        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
+          @goPage="goPage($event, 'info')" />
+        <!-- /Pagination-->
+      </template>
+    </InfoRoomModal>
+    <!-- /Info Modal -->
 
-      <!-- Info Modal -->
-      <InfoRoomModal :show="isInfo" @close="closeInfo">
-        <template #header
-          >Счёт фактура: {{ invoiceStore.invoiceById?.title }}</template
-        >
-        <template #body>
-          <div
-            v-if="!qrCodeStore.qrCodes.length"
-            class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[660px]"
-          >
-            Бу хонага маҳсулот бириктирилмаган
-          </div>
-          <div
-            v-else
-            class="overflow-auto rounded-2xl bg-white py-2 lg:h-[640px]"
-          >
-            <qrCodeTable
-              :columns="columnsInfo"
-              :data="qrCodeStore.qrCodes"
-              :page="pageInfo"
-              :limit="12"
-              @download="downloadFile"
-              @showQr="showFile"
-              :count="qrCodeStore.count"
-              :summa="qrCodeStore.summa"
-            />
-          </div>
-        </template>
-        <template #footer>
-          <!-- Pagination -->
-          <div
-            class="text-main flex w-full items-center justify-end gap-2 px-10"
-          >
-            <span
-              class="flex cursor-pointer items-center"
-              @click="prewPage('info')"
-            >
-              <ChevronLeftIcon class="h-4 w-4" />
-            </span>
-            <span
-              v-if="pageInfo > 2"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              :class="1 === pageInfo ? 'bg-main text-white' : ''"
-              @click="goPage(1, 'info')"
-            >
-              {{ 1 }}
-            </span>
-            <span v-if="pageInfo > 2">...</span>
-            <span
-              v-if="pageInfo > 1"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              @click="goPage(pageInfo - 1, 'info')"
-            >
-              {{ pageInfo - 1 }}
-            </span>
-            <span
-              class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
-              @click="goPage(pageInfo, 'info')"
-            >
-              {{ pageInfo }}
-            </span>
-            <span
-              v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              @click="goPage(pageInfo + 1, 'info')"
-            >
-              {{ Number(pageInfo) + 1 }}
-            </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              >...</span
-            >
-            <span
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              v-if="Math.ceil(qrCodeStore.count / 12) > pageInfo"
-              :class="
-                Math.ceil(qrCodeStore.count / 12) === pageInfo
-                  ? 'bg-main text-white'
-                  : ''
-              "
-              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')"
-            >
-              {{ Math.ceil(qrCodeStore.count / 12) }}
-            </span>
-            <span
-              class="flex cursor-pointer items-center gap-1"
-              @click="nextPage('info')"
-            >
-              <ChevronRightIcon class="h-4 w-4" />
-            </span>
-          </div>
-          <!-- /Pagination-->
-        </template>
-      </InfoRoomModal>
-      <!-- /Info Modal -->
-
-      <!-- showModal -->
-      <BaseModal :show="showQr" @close="closeFileModal">
-        <template #header>Қр Код: {{ qrCode }} </template>
-        <template #body>
-          <div class="flex items-center justify-center p-20">
-            <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
-          </div>
-        </template>
-      </BaseModal>
-      <!-- /showModal -->
-    </Teleport>
-    <!-- /Modal -->
-  </div>
+    <!-- showModal -->
+    <BaseModal :show="showQr" @close="closeFileModal">
+      <template #header>Қр Код: {{ qrCode }} </template>
+      <template #body>
+        <div class="flex items-center justify-center p-20">
+          <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
+        </div>
+      </template>
+    </BaseModal>
+    <!-- /showModal -->
+  </Teleport>
+  <!-- /Modal -->
 </template>

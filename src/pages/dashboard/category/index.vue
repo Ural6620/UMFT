@@ -3,8 +3,9 @@ import { ref, reactive, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/solid";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon } from "@heroicons/vue/24/solid";
 import { useRoute, useRouter } from "vue-router";
+import { colCategory, colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
@@ -14,6 +15,7 @@ import BaseInput from "@/components/form/BaseInput.vue";
 import CategoryTable from "@/components/table/CategoryTable.vue";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
+import Pagination from "@/components/ui/Pagination.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -31,27 +33,6 @@ const titleCategory = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
 const limit = 8;
-
-const columns = [
-  { name: "№" },
-  { name: "Расми" },
-  { name: "Номи" },
-  { name: "Маҳсулотлар сони" },
-  { name: "Қр кодлари" },
-  { name: "Статуси" },
-  { name: "" },
-];
-
-const columnsInfo = [
-  { name: "№" },
-  { name: "Маҳсулот" },
-  { name: "Модел" },
-  { name: "Фактура" },
-  { name: "Хона" },
-  { name: "Ходим" },
-  { name: "Нарҳ" },
-  { name: "" },
-];
 
 const form = reactive({
   img: "",
@@ -181,7 +162,7 @@ async function nextPage(item) {
   }
 }
 
-async function searchCategory() {
+async function filter() {
   pageNum.value = 1;
   await router.push({
     name: "category",
@@ -230,7 +211,7 @@ async function showFile(item) {
   showQr.value = true;
   isInfo.value = false;
   try {
-    const fileUrl = `http://195.158.9.124:4101/files/qrcode/${item}.png`;
+    const fileUrl = `${api.defaults.baseURL}/files/qrcode/${item}.png`;
     const response = await fetch(fileUrl);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -253,6 +234,16 @@ function closeInfo() {
   isInfo.value = false;
 }
 
+function clear() {
+  titleCategory.value = "";
+  pageNum.value = 1;
+  router.push({
+    name: "category",
+    query: { page: pageNum.value, title: titleCategory.value },
+  });
+  categoryStore.get(limit, pageNum.value, titleCategory.value);
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
@@ -271,255 +262,108 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="flex flex-col gap-4">
-    <!-- Header Category -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-main text-xl font-semibold">Тоифа</h3>
-      <div class="flex items-center gap-4">
-        <!-- Filter title -->
-        <input
-          type="text"
-          class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-          placeholder="Тоифа номи"
-          v-model="titleCategory"
-          @input="searchCategory"
-        />
-        <!-- /Filter title -->
 
-        <BaseButton @click="showModal = true" class="text-green-600">
-          Яратиш
-        </BaseButton>
-      </div>
+  <!-- Header Category -->
+  <div class="flex items-center justify-between pb-4">
+    <h3 class="text-main text-xl font-semibold">Тоифа</h3>
+    <div class="flex items-center gap-4">
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        placeholder="Тоифа номи" v-model="titleCategory" />
+      <!-- /Filter title -->
+
+      <BaseButton @click="filter" color="blue">
+        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red">
+        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="showModal = true" color="green">
+        <PlusIcon class="h-4 w-4" />
+      </BaseButton>
     </div>
-    <!-- /Header Category -->
-
-    <!-- Table  -->
-    <div class="h-[600px] overflow-auto rounded-2xl bg-white py-2">
-      <CategoryTable
-        :columns="columns"
-        :data="categoryStore.categories"
-        @edite="handleEdite"
-        @delete="openDelete"
-        :page="pageNum"
-        :limit="limit"
-        @main="openInfo"
-      />
-    </div>
-    <!-- /Table  -->
-
-    <!-- Pagination -->
-    <div class="text-main flex w-full items-center justify-end gap-2 px-10">
-      <span class="flex cursor-pointer items-center" @click="prewPage">
-        <ChevronLeftIcon class="h-4 w-4" />
-      </span>
-      <span
-        v-if="pageNum > 2"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        :class="1 === pageNum ? 'bg-main text-white' : ''"
-        @click="goPage(1)"
-      >
-        {{ 1 }}
-      </span>
-      <span v-if="pageNum > 2">...</span>
-      <span
-        v-if="pageNum > 1"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        @click="goPage(pageNum - 1)"
-      >
-        {{ pageNum - 1 }}
-      </span>
-      <span
-        class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
-        @click="goPage(pageNum)"
-      >
-        {{ pageNum }}
-      </span>
-      <span
-        v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1"
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        @click="goPage(pageNum + 1)"
-      >
-        {{ Number(pageNum) + 1 }}
-      </span>
-      <span v-if="pageNum < Math.ceil(categoryStore.count / limit) - 1"
-        >...</span
-      >
-      <span
-        class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-        v-if="Math.ceil(categoryStore.count / limit) > pageNum"
-        :class="
-          Math.ceil(categoryStore.count / limit) === pageNum
-            ? 'bg-main text-white'
-            : ''
-        "
-        @click="goPage(Math.ceil(categoryStore.count / limit))"
-      >
-        {{ Math.ceil(categoryStore.count / limit) }}
-      </span>
-      <span class="flex cursor-pointer items-center gap-1" @click="nextPage">
-        <ChevronRightIcon class="h-4 w-4" />
-      </span>
-    </div>
-    <!-- /Pagination-->
-
-    <!-- Modal -->
-    <Teleport to="body">
-      <!-- Add and Edite Modal -->
-      <BaseModal :show="showModal" @close="closeModal">
-        <template #header
-          >Тоифа{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template
-        >
-        <template #body>
-          <BaseForm class="grid grid-cols-2 gap-2">
-            <BaseInput
-              label="Расм"
-              inputType="file"
-              :placeholder="form.img ? form.img : 'add image'"
-              @change="handleImage"
-            />
-            <BaseInput
-              v-model="form.title"
-              label="Тоифа номи"
-              placeholder="Тоифа номи"
-              inputType="string"
-            />
-          </BaseForm>
-        </template>
-        <template #button>
-          <button
-            @click="submitForm"
-            class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300"
-          >
-            Сақлаш
-          </button>
-        </template>
-      </BaseModal>
-      <!-- /Add and Edite Modal -->
-
-      <!-- Delete Modal -->
-      <DeleteModal
-        :show="isDelete"
-        @close="isDelete = false"
-        @delete="handleDelete"
-      >
-        <div class="flex justify-center">
-          <p class="text-gray-500">
-            Сиз
-            <span class="capitalize text-red-400">
-              {{ categoryStore.categoryById?.title }}</span
-            >
-            тоифани ўчирмоқдасиз!
-          </p>
-        </div>
-      </DeleteModal>
-      <!-- /Delete Modal -->
-
-      <!-- Info Modal -->
-      <InfoRoomModal :show="isInfo" @close="closeInfo">
-        <template #header
-          >Тоифа: {{ categoryStore.categoryById?.title }}</template
-        >
-        <template #body>
-          <div
-            v-if="!qrCodeStore.qrCodes.length"
-            class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[640px]"
-          >
-            Бу тоифага маҳсулот бириктирилмаган
-          </div>
-          <div
-            v-else
-            class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]"
-          >
-            <qrCodeTable
-              :columns="columnsInfo"
-              :data="qrCodeStore.qrCodes"
-              :page="pageInfo"
-              :limit="12"
-              :count="qrCodeStore.count"
-              :summa="qrCodeStore.summa"
-              @download="downloadFile"
-              @showQr="showFile"
-            />
-          </div>
-        </template>
-        <template #footer>
-          <!-- Pagination -->
-          <div
-            class="text-main flex w-full items-center justify-end gap-2 px-10"
-          >
-            <span
-              class="flex cursor-pointer items-center"
-              @click="prewPage('info')"
-            >
-              <ChevronLeftIcon class="h-4 w-4" />
-            </span>
-            <span
-              v-if="pageInfo > 2"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              :class="1 === pageInfo ? 'bg-main text-white' : ''"
-              @click="goPage(1, 'info')"
-            >
-              {{ 1 }}
-            </span>
-            <span v-if="pageInfo > 2">...</span>
-            <span
-              v-if="pageInfo > 1"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              @click="goPage(pageInfo - 1, 'info')"
-            >
-              {{ pageInfo - 1 }}
-            </span>
-            <span
-              class="bg-main cursor-pointer rounded-md px-2 text-white transition-all ease-linear"
-              @click="goPage(pageInfo, 'info')"
-            >
-              {{ pageInfo }}
-            </span>
-            <span
-              v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              @click="goPage(pageInfo + 1, 'info')"
-            >
-              {{ Number(pageInfo) + 1 }}
-            </span>
-            <span v-if="pageInfo < Math.ceil(qrCodeStore.count / 12) - 1"
-              >...</span
-            >
-            <span
-              class="cursor-pointer rounded-md px-2 transition-all ease-linear"
-              v-if="Math.ceil(qrCodeStore.count / 12) > pageInfo"
-              :class="
-                Math.ceil(qrCodeStore.count / 12) === pageInfo
-                  ? 'bg-main text-white'
-                  : ''
-              "
-              @click="goPage(Math.ceil(qrCodeStore.count / 12), 'info')"
-            >
-              {{ Math.ceil(qrCodeStore.count / 12) }}
-            </span>
-            <span
-              class="flex cursor-pointer items-center gap-1"
-              @click="nextPage('info')"
-            >
-              <ChevronRightIcon class="h-4 w-4" />
-            </span>
-          </div>
-          <!-- /Pagination-->
-        </template>
-      </InfoRoomModal>
-      <!-- /Info Modal -->
-
-      <!-- showModal -->
-      <BaseModal :show="showQr" @close="closeFileModal">
-        <template #header>Қр Код: {{ qrCode }} </template>
-        <template #body>
-          <div class="flex items-center justify-center p-20">
-            <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
-          </div>
-        </template>
-      </BaseModal>
-      <!-- /showModal -->
-    </Teleport>
-    <!-- /Modal -->
   </div>
+  <!-- /Header Category -->
+
+  <!-- Table  -->
+  <div class="flex-1 overflow-auto rounded-2xl bg-white py-2">
+    <CategoryTable :columns="colCategory" :data="categoryStore.categories" @edite="handleEdite" @delete="openDelete"
+      :page="pageNum" :limit="limit" @main="openInfo" />
+  </div>
+  <!-- /Table  -->
+
+  <!-- Pagination -->
+  <Pagination :page="pageNum" :limit="limit" :data="categoryStore" @next="nextPage" @prew="prewPage" @goPage="goPage" />
+  <!-- /Pagination-->
+
+  <!-- Modal -->
+  <Teleport to="body">
+    <!-- Add and Edite Modal -->
+    <BaseModal :show="showModal" @close="closeModal">
+      <template #header>Тоифа{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template>
+      <template #body>
+        <BaseForm class="grid grid-cols-2 gap-2">
+          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
+            @change="handleImage" />
+          <BaseInput v-model="form.title" label="Тоифа номи" placeholder="Тоифа номи" inputType="string" />
+        </BaseForm>
+      </template>
+      <template #button>
+        <button @click="submitForm"
+          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
+          Сақлаш
+        </button>
+      </template>
+    </BaseModal>
+    <!-- /Add and Edite Modal -->
+
+    <!-- Delete Modal -->
+    <DeleteModal :show="isDelete" @close="isDelete = false" @delete="handleDelete">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">
+            {{ categoryStore.categoryById?.title }}</span>
+          тоифани ўчирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete Modal -->
+
+    <!-- Info Modal -->
+    <InfoRoomModal :show="isInfo" @close="closeInfo">
+      <template #header>Тоифа: {{ categoryStore.categoryById?.title }}</template>
+      <template #body>
+        <div v-if="!qrCodeStore.qrCodes.length"
+          class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[640px]">
+          Бу тоифага маҳсулот бириктирилмаган
+        </div>
+        <div v-else class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]">
+          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+        </div>
+      </template>
+      <template #footer>
+        <!-- Pagination -->
+        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
+          @goPage="goPage($event, 'info')" />
+        <!-- /Pagination-->
+      </template>
+    </InfoRoomModal>
+    <!-- /Info Modal -->
+
+    <!-- showModal -->
+    <BaseModal :show="showQr" @close="closeFileModal">
+      <template #header>Қр Код: {{ qrCode }} </template>
+      <template #body>
+        <div class="flex items-center justify-center p-20">
+          <img class="h-64 w-64" :src="urlQrCode" alt="Qr Code" />
+        </div>
+      </template>
+    </BaseModal>
+    <!-- /showModal -->
+  </Teleport>
+  <!-- /Modal -->
+
 </template>
