@@ -8,6 +8,7 @@ import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon, EyeIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
+import { QrcodeStream } from "vue-qrcode-reader";
 import api from "@/plugins/axios";
 import EmployeeTable from "@/components/table/EmployeeTable.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
@@ -38,7 +39,9 @@ const titleEmployee = ref("");
 const codeDepartment = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
-const placeholder = ref("Кафедрани танланг")
+const placeholder = ref("Кафедрани танланг");
+const scannedData = ref('');
+const cameraReady = ref(false);
 
 const form = reactive({
   employee: "",
@@ -266,6 +269,18 @@ function clear() {
   employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.value);
 }
 
+function onDecode(data) {
+  scannedData.value = data;
+}
+
+function onInit(promise) {
+  promise.then(() => {
+    cameraReady.value = true;
+  }).catch(error => {
+    console.error('Error initializing camera:', error);
+  });
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
@@ -316,7 +331,12 @@ onMounted(async () => {
     </div>
   </div>
   <!-- /Header Product -->
-
+  <div class="w-96 h-96 z-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <p v-if="!cameraReady">Initializing camera...</p>
+    <p v-else>Camera is ready. Scan a QR code!</p>
+    <QrcodeStream @decode="onDecode" @init="onInit" />
+    <p v-if="scannedData">Scanned QR Code: {{ scannedData }}</p>
+  </div>
   <!-- Table -->
   <div class="flex-1 overflow-auto rounded-2xl bg-white">
     <EmployeeTable :columns="colEmployee" :data="employeeStore.employees" :page="pageNum" :limit="limit"
