@@ -21,8 +21,8 @@ function handleEdite(item) {
 }
 </script>
 <template>
-  <table class="relative w-full space-x-10 overflow-hidden text-left">
-    <thead class="sticky top-0 bg-white text-[#718EBF]">
+  <table class="relative w-full text-left">
+    <thead class="sticky top-0 bg-white text-[#718EBF] z-10">
       <tr>
         <th scope="col" class="p-2 lg:px-6" v-for="column in columns">
           {{ column.name }}
@@ -40,7 +40,7 @@ function handleEdite(item) {
         <td class="p-2 lg:px-6">{{ item.title }}</td>
         <td class="p-2 lg:px-6">{{ item.number }}</td>
         <td class="p-2 lg:px-6 truncate">{{ item.address }}</td>
-        <td class="p-2 lg:px-6">
+        <td class="p-2 lg:px-6 truncate">
           {{ item.status === 1 ? "Фаол" : "Фаол емас" }}
         </td>
         <td class="px-4 py-2">
@@ -51,7 +51,6 @@ function handleEdite(item) {
             <BaseButton @click="handleDelete(item)" color="red">
               <TrashIcon class="relative h-3.5 w-3.5" />
             </BaseButton>
-
           </div>
         </td>
       </tr>

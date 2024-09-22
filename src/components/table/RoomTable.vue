@@ -1,6 +1,7 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/vue/24/solid";
+import BaseButton from "../ui/BaseButton.vue";
 const props = defineProps({
   columns: Array,
   data: Array,
@@ -20,8 +21,8 @@ function handleMain(item) {
 }
 </script>
 <template>
-  <table class="relative w-full space-x-10 overflow-hidden text-left transition-all duration-1000 ease-linear">
-    <thead class="sticky top-0 font-medium text-[#718EBF]">
+  <table class="relative w-full text-left">
+    <thead class="sticky top-0 font-medium text-[#718EBF] z-10">
       <tr>
         <th scope="col" class="px-6 py-3" v-for="column in columns">
           {{ column.name }}
@@ -29,8 +30,8 @@ function handleMain(item) {
       </tr>
     </thead>
     <tbody>
-      <tr class="cursor-pointer border-t bg-white transition duration-300 ease-in-out hover:bg-[#f5f5f5]"
-        v-for="(item, index) in data" @click="handleMain(item)">
+      <tr class="cursor-pointer border-t bg-white  hover:bg-[#f5f5f5]" v-for="(item, index) in data"
+        @click="handleMain(item)">
         <td class="pl-6">{{ (props.page - 1) * limit + index + 1 }}</td>
         <td class="px-6 py-1">{{ item.title }}</td>
         <td class="px-6 py-1">{{ item.number }}</td>
@@ -42,19 +43,12 @@ function handleMain(item) {
           {{ item.status === 1 ? "Фаол" : "Фаол эмас" }}
         </td>
         <td class="flex items-center justify-end gap-4 px-4 py-1">
-          <button
-            class="inline-flex h-[30px] items-center justify-center gap-1 rounded bg-blue-100 p-2 hover:bg-blue-300"
-            @click.stop="handleEdite(item)">
-            <div class="relative h-3.5 w-3.5">
-              <PencilSquareIcon class="text-blue-600" />
-            </div>
-          </button>
-          <button @click.stop="handleDelete(item)"
-            class="inline-flex h-[30px] items-center justify-center gap-1 rounded bg-red-100 p-2 hover:bg-red-300">
-            <div class="relative h-3.5 w-3.5">
-              <TrashIcon class="text-red-600" />
-            </div>
-          </button>
+          <BaseButton @click.stop="handleEdite(item)" color="blue">
+            <PencilSquareIcon class="w-3.5 h-3.5" />
+          </BaseButton>
+          <BaseButton @click.stop="handleDelete(item)" color="red">
+            <TrashIcon class="w-3.5 h-3.5" />
+          </BaseButton>
         </td>
       </tr>
     </tbody>

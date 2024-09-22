@@ -7,6 +7,7 @@ import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon } from "@heroicons/vue/24/solid";
+import { colEmployee } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import EmployeeTable from "@/components/table/EmployeeTable.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
@@ -17,7 +18,6 @@ import SelectDepartment from "@/components/form/SelectDepartment.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
-import { colEmployee } from "@/components/constants/constants";
 import Pagination from "@/components/ui/Pagination.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
 
@@ -295,7 +295,7 @@ onMounted(async () => {
     <div class="flex items-center gap-4">
       <!-- Filter Department -->
       <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" v-model="codeDepartment"
-        @update:model-value="filterDepartment" />
+        @update:model-value="filterDepartment" class="w-40 lg:w-64" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->

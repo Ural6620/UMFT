@@ -7,6 +7,7 @@ import { useProductStore } from "@/stores/product";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { colProduct, colInfo } from "@/components/constants/constants";
+import api from "@/plugins/axios";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import DeleteModal from "@/components/ui/DeleteModal.vue";
@@ -16,7 +17,6 @@ import SelectFilial from "@/components/form/SelectFilial.vue";
 import ProductTable from "@/components/table/ProductTable.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
-import api from "@/plugins/axios";
 import Pagination from "@/components/ui/Pagination.vue";
 
 const route = useRoute();
@@ -248,7 +248,6 @@ onMounted(async () => {
         class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Маҳсулот номи" v-model="titleProduct" />
       <!-- /Filter title -->
-
       <BaseButton @click="filter" color="blue">
         <ArchiveBoxArrowDownIcon class="h-4 w-4" />
       </BaseButton>

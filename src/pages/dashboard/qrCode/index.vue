@@ -131,7 +131,7 @@ async function nextPage() {
 
 function clear() {
   titleProduct.value = "";
-  orderRoom.value="";
+  orderRoom.value = "";
   pageNum.value = 1;
   router.push({
     name: "qrCode",
@@ -186,7 +186,7 @@ onMounted(async () => {
   <!-- /Header Product -->
 
   <!-- Table -->
-  <div class="overflow-auto rounded-2xl bg-white py-2 flex-1">
+  <div class="overflow-auto rounded-2xl bg-white flex-1">
     <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageNum" :limit="limit" @download="downloadFile"
       @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
   </div>

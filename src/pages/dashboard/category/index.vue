@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon } from "@heroicons/vue/24/solid";
+import { PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon } from "@heroicons/vue/24/solid";
 import { useRoute, useRouter } from "vue-router";
 import { colCategory, colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";

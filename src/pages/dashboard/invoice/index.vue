@@ -104,7 +104,7 @@ function closeInvoiceFileModal() {
 
 async function downloadInvoiceFile(item) {
   try {
-    const fileUrl = `http://195.158.9.124:4101/${item}`;
+    const fileUrl = `${api.defaults.baseURL}/${item}`;
     const response = await fetch(fileUrl);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

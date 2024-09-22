@@ -8,9 +8,8 @@ import { useInvoiceStore } from "@/stores/invoice";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useEmployeeStore } from "@/stores/employee";
 import { useCategoryStore } from "@/stores/category";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
-const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const filialStore = useFilialStore();
@@ -51,68 +50,47 @@ onMounted(async () => {
     </div>
 
     <div class="grid grid-cols-2 gap-10 lg:grid-cols-4">
-      <div
-        @click="router.push('/filial')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/filial')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Филиаллар</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ filialStore.count }}
         </p>
       </div>
 
-      <div
-        @click="router.push('/rooms')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/rooms')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Хоналар</h4>
         <p class="pb-6 text-center text-5xl font-bold">{{ roomStore.count }}</p>
       </div>
 
-      <div
-        @click="router.push('/category')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/category')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Тоифалар</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ categoryStore.count }}
         </p>
       </div>
 
-      <div
-        @click="router.push('/product')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/product')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Маҳсулотлар</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ productStore.count }}
         </p>
       </div>
 
-      <div
-        @click="router.push('/invoice')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/invoice')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Фактура</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ invoiceStore.count }}
         </p>
       </div>
 
-      <div
-        @click="router.push('/code')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/code')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Қр Кодлар</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ qrCodeStore.count }}
         </p>
       </div>
 
-      <div
-        @click="router.push('/employee')"
-        class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2"
-      >
+      <div @click="router.push('/employee')" class="flex h-auto cursor-pointer flex-col rounded-xl bg-white px-4 py-2">
         <h4 class="text-md text-main">Ишчилар</h4>
         <p class="pb-6 text-center text-5xl font-bold">
           {{ employeeStore.count }}
