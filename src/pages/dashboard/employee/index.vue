@@ -40,7 +40,7 @@ const codeDepartment = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
 const placeholder = ref("Кафедрани танланг");
-const result = ref('')
+const errorEl = ref('')
 const isCameraActive = ref(false)
 const selectedConstraints = ref({ facingMode: 'environment' })
 const currentIndex = ref(null); // Hozirgi indexni saqlash
@@ -267,19 +267,6 @@ function clear() {
   employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.value);
 }
 
-// async function onDetect(detectedCodes, index) {
-//   const arr = detectedCodes[0]?.rawValue.split('/');
-//   const id = arr[arr.length - 1];
-//   result.value = id || 'QR kod topilmadi';
-//   await qrCodeStore.getQrCodeById(id);
-//   const { product, room } = qrCodeStore.qrcodeById
-//   form.inventories[index].room = room._id;
-//   form.inventories[index].product = product._id;
-//   form.inventories[index]._id = id;
-//   isCameraActive.value = false;
-//   showModal.value = true;
-// }
-
 function openCamera(index) {
   currentIndex.value = index; // Hozirgi indexni belgilash
   isCameraActive.value = true;
@@ -287,34 +274,48 @@ function openCamera(index) {
 }
 
 async function onDetect(detectedCodes) {
-  if (currentIndex.value === null) {
-    console.error("Current index is not set!");
-    return;
+  try {
+    if (currentIndex.value === null) {
+      console.error("Current index is not set!");
+      return;
+    }
+
+    const arr = detectedCodes[0]?.rawValue.split('/');
+    const id = arr[arr.length - 1];
+
+    try {
+      await qrCodeStore.getQrCodeById(id);
+    } catch (error) {
+      errorEl.value = 'Xonaga biriktirilmagan QR kod';
+      isCameraActive.value = false;
+      showModal.value = true;
+      return;
+    }
+
+    const { product, room } = qrCodeStore.qrcodeById;
+
+    if (currentIndex.value !== null) {
+      form.inventories[currentIndex.value].room = room._id;
+      form.inventories[currentIndex.value].product = product._id;
+      form.inventories[currentIndex.value]._id = id;
+    }
+
+    isCameraActive.value = false;
+    showModal.value = true;
+    currentIndex.value = null;
+    errorEl.value = ''
+
+  } catch (error) {
+    errorEl.value = 'Bu QR kod topilmadi. Qayta urinib ko‘ring.';
+    isCameraActive.value = false;
+    showModal.value = true;
   }
-
-  const arr = detectedCodes[0]?.rawValue.split('/');
-  const id = arr[arr.length - 1];
-  result.value = id || 'QR kod topilmadi';
-  await qrCodeStore.getQrCodeById(id);
-
-  const { product, room } = qrCodeStore.qrcodeById;
-
-  if (currentIndex.value !== null) {
-    form.inventories[currentIndex.value].room = room._id;
-    form.inventories[currentIndex.value].product = product._id;
-    form.inventories[currentIndex.value]._id = id;
-  }
-
-  isCameraActive.value = false;
-  showModal.value = true;
-  currentIndex.value = null; // Indexni tiklash
 }
-
-
 
 function closeCamera() {
   isCameraActive.value = false;
   showModal.value = true;
+  errorEl.value = ''
 }
 
 function switchCamera() {
@@ -322,14 +323,6 @@ function switchCamera() {
     selectedConstraints.value.facingMode === 'environment'
       ? { facingMode: 'user' }
       : { facingMode: 'environment' }
-}
-
-const error = ref('')
-
-function onError(err) {
-  error.value = `[Xato]: ${err.message || 'Noma\'lum xato'}`
-  isCameraActive.value = false;
-  showModal.value = true;
 }
 
 onMounted(async () => {
@@ -425,7 +418,7 @@ onMounted(async () => {
               </div>
             </div>
             <div class="w-full">
-              <p class="error">{{ error }}</p>
+              <p v-if="errorEl" class="text-red-600">{{ errorEl }}</p>
             </div>
             <button @click.prevent="addInvoice()"
               class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
