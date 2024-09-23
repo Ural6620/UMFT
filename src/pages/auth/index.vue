@@ -3,7 +3,6 @@ import { reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import BaseInput from "@/components/form/BaseInput.vue";
-import BaseButton from "@/components/ui/BaseButton.vue";
 import { EyeIcon } from "@heroicons/vue/24/solid";
 import PasswordInput from "@/components/form/PasswordInput.vue";
 
@@ -17,7 +16,6 @@ const form = reactive({
 
 const submitForm = async () => {
   if (form.login && form.password) {
-    console.log(form)
     await authStore.login({
       login: form.login,
       password: form.password,

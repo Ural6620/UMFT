@@ -6,9 +6,9 @@ import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon, EyeIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon, EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
-import { QrcodeStream } from "vue-qrcode-reader";
+import { QrcodeStream } from 'vue-qrcode-reader'
 import api from "@/plugins/axios";
 import EmployeeTable from "@/components/table/EmployeeTable.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
@@ -40,8 +40,10 @@ const codeDepartment = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
 const placeholder = ref("Кафедрани танланг");
-const scannedData = ref('');
-const cameraReady = ref(false);
+const result = ref('')
+const isCameraActive = ref(false)
+const selectedConstraints = ref({ facingMode: 'environment' })
+const currentIndex = ref(null); // Hozirgi indexni saqlash
 
 const form = reactive({
   employee: "",
@@ -83,8 +85,8 @@ function resetForm() {
   form.employee = "";
   form.inventories = [
     {
-      room: "",
-      product: "",
+      room: '',
+      product: '',
       _id: "",
     },
   ];
@@ -92,10 +94,6 @@ function resetForm() {
 
 async function synchronAll() {
   await employeeStore.patch();
-}
-
-async function synchron(product, room) {
-  await qrCodeStore.getAll(0, 0, product, room, "empty");
 }
 
 function submitForm() {
@@ -269,16 +267,69 @@ function clear() {
   employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.value);
 }
 
-function onDecode(data) {
-  scannedData.value = data;
+// async function onDetect(detectedCodes, index) {
+//   const arr = detectedCodes[0]?.rawValue.split('/');
+//   const id = arr[arr.length - 1];
+//   result.value = id || 'QR kod topilmadi';
+//   await qrCodeStore.getQrCodeById(id);
+//   const { product, room } = qrCodeStore.qrcodeById
+//   form.inventories[index].room = room._id;
+//   form.inventories[index].product = product._id;
+//   form.inventories[index]._id = id;
+//   isCameraActive.value = false;
+//   showModal.value = true;
+// }
+
+function openCamera(index) {
+  currentIndex.value = index; // Hozirgi indexni belgilash
+  isCameraActive.value = true;
+  showModal.value = false;
 }
 
-function onInit(promise) {
-  promise.then(() => {
-    cameraReady.value = true;
-  }).catch(error => {
-    console.error('Error initializing camera:', error);
-  });
+async function onDetect(detectedCodes) {
+  if (currentIndex.value === null) {
+    console.error("Current index is not set!");
+    return;
+  }
+
+  const arr = detectedCodes[0]?.rawValue.split('/');
+  const id = arr[arr.length - 1];
+  result.value = id || 'QR kod topilmadi';
+  await qrCodeStore.getQrCodeById(id);
+
+  const { product, room } = qrCodeStore.qrcodeById;
+
+  if (currentIndex.value !== null) {
+    form.inventories[currentIndex.value].room = room._id;
+    form.inventories[currentIndex.value].product = product._id;
+    form.inventories[currentIndex.value]._id = id;
+  }
+
+  isCameraActive.value = false;
+  showModal.value = true;
+  currentIndex.value = null; // Indexni tiklash
+}
+
+
+
+function closeCamera() {
+  isCameraActive.value = false;
+  showModal.value = true;
+}
+
+function switchCamera() {
+  selectedConstraints.value =
+    selectedConstraints.value.facingMode === 'environment'
+      ? { facingMode: 'user' }
+      : { facingMode: 'environment' }
+}
+
+const error = ref('')
+
+function onError(err) {
+  error.value = `[Xato]: ${err.message || 'Noma\'lum xato'}`
+  isCameraActive.value = false;
+  showModal.value = true;
 }
 
 onMounted(async () => {
@@ -324,19 +375,13 @@ onMounted(async () => {
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-
       <BaseButton @click.prevent="synchronAll()" color="yellow">
         <ArrowPathIcon class="h-3.5 w-3.5" />
       </BaseButton>
     </div>
   </div>
   <!-- /Header Product -->
-  <div class="w-96 h-96 z-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-    <p v-if="!cameraReady">Initializing camera...</p>
-    <p v-else>Camera is ready. Scan a QR code!</p>
-    <QrcodeStream @decode="onDecode" @init="onInit" />
-    <p v-if="scannedData">Scanned QR Code: {{ scannedData }}</p>
-  </div>
+
   <!-- Table -->
   <div class="flex-1 overflow-auto rounded-2xl bg-white">
     <EmployeeTable :columns="colEmployee" :data="employeeStore.employees" :page="pageNum" :limit="limit"
@@ -350,7 +395,6 @@ onMounted(async () => {
 
   <!-- Modal -->
   <Teleport to="body">
-    <!-- /Invoice Modal -->
     <InvoiceModal :show="showModal" @close="closeModal">
       <template #header>Маҳсулотга бириктириш</template>
       <!-- Edite Modal -->
@@ -363,9 +407,9 @@ onMounted(async () => {
               <h4 class="col-span-3">Хона</h4>
               <h4 class="col-span-3">Қр Код</h4>
             </div>
-            <div v-for="item in form.inventories" class="grid w-full grid-cols-11 items-center gap-4">
-              <div class="col-span-1 flex items-center">
-                <BaseButton @click.prevent="synchron(item.product, item.room)" color="green">
+            <div v-for="(item, index) in form.inventories" class="grid w-full grid-cols-11 items-baseline gap-4">
+              <div class="col-span-1 flex items-baseline">
+                <BaseButton @click.prevent="openCamera(index)" color="blue">
                   <EyeIcon class="relative h-3.5 w-3.5" />
                 </BaseButton>
               </div>
@@ -379,6 +423,9 @@ onMounted(async () => {
                   <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
                 </button>
               </div>
+            </div>
+            <div class="w-full">
+              <p class="error">{{ error }}</p>
             </div>
             <button @click.prevent="addInvoice()"
               class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
@@ -428,6 +475,20 @@ onMounted(async () => {
       </template>
     </BaseModal>
     <!-- /showModal -->
+
+    <!-- cameraModal -->
+    <BaseModal :show="isCameraActive" @close="closeCamera">
+      <template #header>Қр Код: {{ qrCode }} </template>
+      <template #body>
+        <div class="w-96 h-96 relative left-1/2 transform -translate-x-1/2">
+          <BaseButton @click.prevent="switchCamera" color="red" class="absolute top-0 right-0 z-20">
+            <ArrowPathIcon class="w-10 h-10" />
+          </BaseButton>
+          <qrcode-stream :constraints="selectedConstraints" @detect="onDetect" @error="onError" class="rounded-2xl" />
+        </div>
+      </template>
+    </BaseModal>
+    <!-- /cameraModal -->
   </Teleport>
   <!-- /Modal -->
 </template>

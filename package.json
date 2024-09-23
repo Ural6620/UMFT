@@ -17,7 +17,8 @@
     "qrcode.vue": "^3.4.1",
     "vue": "^3.4.29",
     "vue-qrcode-reader": "^5.5.9",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "vue3-qr-reader": "^1.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
