@@ -80,6 +80,7 @@ export const colInvoice = [
 // Employee
 export const colEmployee = [
   { name: "№" },
+  { name: "Расми" },
   { name: "Тўлиқ Исми" },
   { name: "Кафедраси" },
   { name: "Академик даражаси" },

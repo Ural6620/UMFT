@@ -6,6 +6,7 @@ export default {
       colors: {
         main: "#022726",
         sub: "#fdaf0a",
+        show: "#283D88"
       },
     },
   },

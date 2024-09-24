@@ -24,7 +24,7 @@ function handleMain(item) {
   <table class="relative w-full text-left">
     <thead class="sticky top-0 bg-white font-medium text-[#718EBF] z-10">
       <tr>
-        <th scope="col" class="px-6 py-4" v-for="column in columns">
+        <th scope="col" class="px-6 py-4 truncate" v-for="column in columns">
           {{ column.name }}
         </th>
       </tr>
@@ -34,6 +34,9 @@ function handleMain(item) {
         @click="handleMain(item)">
         <td class="truncate py-2 pl-6">
           {{ (page - 1) * limit + (index + 1) }}
+        </td>
+        <td class="p-2 lg:px-6">
+          <img class="h-12 w-12 rounded-full" :src="`${item.image}`" alt="employee image" />
         </td>
         <td class="truncate px-6 py-2">{{ item.full_name }}</td>
         <td class="truncate px-6 py-2">{{ item.department?.name }}</td>

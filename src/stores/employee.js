@@ -25,5 +25,6 @@ export const useEmployeeStore = defineStore('employee', {
     async editeEmployee(data) {
       await api.put("/employee", data);
     },
+    
   }
 })

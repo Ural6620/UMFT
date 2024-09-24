@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { ChevronDownIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon } from "@heroicons/vue/24/solid";
+import { ChevronDownIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, Bars3Icon } from "@heroicons/vue/24/solid";
 import { useAuthStore } from "@/stores/auth";
 import { useRoomStore } from "@/stores/room";
 import { useFilialStore } from "@/stores/filial";
@@ -292,9 +292,9 @@ onMounted(async () => {
 
 <template>
   <!-- Room Header section -->
-  <div class="flex items-center justify-between pb-4">
-    <h3 class="text-main hidden text-xl font-semibold lg:block">Хона</h3>
-    <div class="flex items-center gap-2 lg:gap-4">
+  <div class="flex items-center justify-between pb-4 relative">
+    <h3 class="text-main text-xl font-semibold">Хона</h3>
+    <div class="flex  items-center gap-2 lg:gap-4">
       <!-- Filter title -->
       <input type="text"
         class="text-main focus:border-main w-28 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-48"
@@ -344,16 +344,19 @@ onMounted(async () => {
         </ul>
       </div>
       <!-- /Filter filial -->
-      <BaseButton @click="filter" color="blue">
+      <BaseButton @click="filter" color="yellow">
         <ArchiveBoxArrowDownIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="green">
+      <BaseButton @click="showModal = true" color="blue">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
+    <BaseButton color="" class="lg:hidden">
+      <Bars3Icon class="h-5 w-5" />
+    </BaseButton>
   </div>
   <!-- /Room Header section -->
 

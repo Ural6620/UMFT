@@ -286,7 +286,7 @@ async function onDetect(detectedCodes) {
     try {
       await qrCodeStore.getQrCodeById(id);
     } catch (error) {
-      errorEl.value = 'Xonaga biriktirilmagan QR kod';
+      errorEl.value = 'Xatolik qayta urinib ko\'ring';
       isCameraActive.value = false;
       showModal.value = true;
       return;
@@ -306,7 +306,7 @@ async function onDetect(detectedCodes) {
     errorEl.value = ''
 
   } catch (error) {
-    errorEl.value = 'Bu QR kod topilmadi. Qayta urinib ko‘ring.';
+    errorEl.value = 'Xonaga biriktirilmagan QR kod';
     isCameraActive.value = false;
     showModal.value = true;
   }
@@ -348,7 +348,7 @@ onMounted(async () => {
 </script>
 <template>
   <!-- Header Product -->
-  <div class="flex items-center justify-between pb-2">
+  <div class="flex items-center justify-between pb-2 pt-16 lg:pt-0 relative">
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
     <div class="flex items-center gap-4">
       <!-- Filter Department -->
@@ -362,21 +362,21 @@ onMounted(async () => {
         placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
       <!-- /Filter title -->
 
-      <BaseButton @click="filter" color="blue">
+      <BaseButton @click="filter" color="yellow">
         <ArchiveBoxArrowDownIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click.prevent="synchronAll()" color="yellow">
-        <ArrowPathIcon class="h-3.5 w-3.5" />
+      <BaseButton @click.prevent="synchronAll()" color="blue">
+        <ArrowPathIcon class="h-5 w-5" />
       </BaseButton>
     </div>
   </div>
   <!-- /Header Product -->
 
   <!-- Table -->
-  <div class="flex-1 overflow-auto rounded-2xl bg-white">
+  <div class="overflow-auto rounded-2xl bg-white">
     <EmployeeTable :columns="colEmployee" :data="employeeStore.employees" :page="pageNum" :limit="limit"
       @edite="openModal" @main="openInfo" />
   </div>

@@ -161,11 +161,6 @@ function resetForm() {
   ];
 }
 
-async function openModal() {
-  productStore.get(0);
-  showModal.value = true;
-}
-
 function closeModal() {
   showModal.value = false;
   resetForm();
@@ -358,14 +353,14 @@ onMounted(async () => {
         placeholder="Фактура рақами" v-model="titleInvoice" />
       <!-- /Filter title -->
 
-      <BaseButton @click="filter" color="blue">
+      <BaseButton @click="filter" color="yellow">
         <ArchiveBoxArrowDownIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="green">
-        <PlusIcon class="h-4 w-4" />
+      <BaseButton @click="showModal = true" color="blue">
+        <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
   </div>

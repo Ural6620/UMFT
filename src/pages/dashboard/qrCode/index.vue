@@ -175,10 +175,10 @@ onMounted(async () => {
         <BaseButton @click="clear" color="red">
           <ArchiveBoxXMarkIcon class="h-4 w-4" />
         </BaseButton>
-        <button @click.prevent="downloadAllFiles()"
-          class="inline-flex items-center justify-center gap-1 rounded bg-yellow-100 p-2 transition ease-linear hover:bg-yellow-300">
-          <ArrowDownOnSquareStackIcon class="h-3.5 w-3.5 text-yellow-600" />
-        </button>
+        <BaseButton @click="downloadAllFiles()" color="blue">
+          <ArrowDownOnSquareStackIcon class="h-4 w-4" />
+        </BaseButton>
+
       </div>
       <!-- /Download all qrCode -->
     </div>

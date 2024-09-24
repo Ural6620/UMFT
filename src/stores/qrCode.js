@@ -9,9 +9,9 @@ export const useQrCodeStore = defineStore("qrCode", () => {
   const qrcodeById = ref(null);
   const summa = ref(null);
 
-  const getAll = async (limit = 15, page = "", product = "", room = "", employeenull = "", invoice = "", employee = "", category = '') => {
+  const getAll = async (limit = 15, page = "", product = "", room = "", employeenull = "", invoice = "", employee = "", category = '', filial = '') => {
     const response = await api.get(
-      `/code?limit=${limit}&page=${page}&product=${product}&room=${room}&employeenull=${employeenull}&invoice=${invoice}&employee=${employee}&categoryinventor=${category}`,
+      `/code?limit=${limit}&page=${page}&product=${product}&room=${room}&employeenull=${employeenull}&invoice=${invoice}&employee=${employee}&categoryinventor=${category}&filial=${filial}`,
     );
     qrCodes.value = response.data.data;
     count.value = response.data.count;
@@ -30,8 +30,11 @@ export const useQrCodeStore = defineStore("qrCode", () => {
   const getQrCodeById = async (id) => {
     const response = await api.get(`/code/show/${id}`);
     qrcodeById.value = response.data;
-    console.log(response.data);
   };
+
+  const updateQrCode = async (form) => {
+    await api.put('/code', form)
+  }
 
   return {
     qrCodes,
@@ -42,5 +45,6 @@ export const useQrCodeStore = defineStore("qrCode", () => {
     getAll,
     getAllRooms,
     getQrCodeById,
+    updateQrCode
   };
 })

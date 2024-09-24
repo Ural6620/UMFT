@@ -248,14 +248,14 @@ onMounted(async () => {
         class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Маҳсулот номи" v-model="titleProduct" />
       <!-- /Filter title -->
-      <BaseButton @click="filter" color="blue">
+      <BaseButton @click="filter" color="yellow">
         <ArchiveBoxArrowDownIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="green">
-        <PlusIcon class="h-4 w-4" />
+      <BaseButton @click="showModal = true" color="blue">
+        <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
   </div>
