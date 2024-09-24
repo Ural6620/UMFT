@@ -8,7 +8,7 @@ import Sidebar from "@/components/layout/dashboard/Sidebar.vue";
 
     <div class="relative left-0 flex h-screen flex-1 flex-col">
       <Header />
-      <div class="flex flex-1 flex-col overflow-hidden bg-[#F5F7FA] p-4">
+      <div class="flex flex-1 flex-col overflow-auto bg-[#F5F7FA] p-4">
         <slot />
       </div>
     </div>

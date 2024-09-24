@@ -141,24 +141,29 @@ function clear() {
 }
 
 onMounted(async () => {
-  const queryPage = route.query.page || 1;
-  const queryTitle = route.query.code;
-  pageNum.value = Number(queryPage) || 1;
-  titleProduct.value = queryTitle || "";
-  await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
-  await roomStore.get(0);
-  await productStore.get(0);
+  await authStore.checkAuth();
+  if (authStore.isAuthenticated) {
+    const queryPage = route.query.page || 1;
+    const queryTitle = route.query.code;
+    pageNum.value = Number(queryPage) || 1;
+    titleProduct.value = queryTitle || "";
+    await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
+    await roomStore.get(0);
+    await productStore.get(0);
+  } else {
+    console.error("Autentifikatsiya muvaffaqiyatsiz");
+  }
 });
 </script>
 <template>
-  <!-- Header Product -->
-  <div class="flex-0 flex items-center justify-between">
+  <!-- Header Qr Code -->
+  <div class="flex items-center justify-between pt-16 lg:pt-0">
     <h3 class="text-main text-xl font-semibold">Қр Код</h3>
     <div class="flex items-center gap-4">
-      <!-- Filter Product -->
+      <!-- Filter Qr Code -->
       <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="col-span-3"
         v-model="titleProduct" @update:modelValue="searchCode" classes="w-32 lg:w-52" />
-      <!-- /Filter Product -->
+      <!-- /Filter Qr Code -->
 
       <!-- Filter Room -->
       <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="col-span-3" v-model="orderRoom"
@@ -178,10 +183,10 @@ onMounted(async () => {
       <!-- /Download all qrCode -->
     </div>
   </div>
-  <!-- /Header Product -->
+  <!-- /Header Qr Code -->
 
   <!-- Table -->
-  <div class="overflow-auto rounded-2xl bg-white flex-1">
+  <div class="overflow-auto rounded-2xl bg-white">
     <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageNum" :limit="limit" @download="downloadFile"
       @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
   </div>
@@ -206,4 +211,5 @@ onMounted(async () => {
     </BaseModal>
   </Teleport>
   <!-- /Modal -->
+
 </template>

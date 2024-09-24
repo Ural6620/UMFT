@@ -279,7 +279,7 @@ async function onDetect(detectedCodes) {
       console.error("Current index is not set!");
       return;
     }
-
+    console.log(detectedCodes[0]?.rawValue);
     const arr = detectedCodes[0]?.rawValue.split('/');
     const id = arr[arr.length - 1];
 

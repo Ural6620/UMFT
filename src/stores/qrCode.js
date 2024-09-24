@@ -30,6 +30,7 @@ export const useQrCodeStore = defineStore("qrCode", () => {
   const getQrCodeById = async (id) => {
     const response = await api.get(`/code/show/${id}`);
     qrcodeById.value = response.data;
+    console.log(response.data);
   };
 
   return {
