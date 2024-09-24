@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { ChevronDownIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, Bars3Icon } from "@heroicons/vue/24/solid";
+import { ChevronDownIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/vue/24/solid";
 import { useAuthStore } from "@/stores/auth";
 import { useRoomStore } from "@/stores/room";
 import { useFilialStore } from "@/stores/filial";
@@ -42,7 +42,7 @@ const qrCode = ref("");
 const urlQrCode = ref("");
 const limit = 15;
 const isLargeScreen = ref(window.innerWidth >= 760);
-const isMobile = ref(false)
+const isMobile = ref(false);
 
 const form = reactive({
   title: "",
@@ -113,7 +113,7 @@ function openModal() {
 async function goPage(n, item) {
   if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", roomId.value);
   } else {
     pageNum.value = n;
     router.push({
@@ -139,7 +139,7 @@ async function prewPage(item) {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", roomId.value);
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -153,7 +153,7 @@ async function nextPage(item) {
     if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", filialId.value);
+    await qrCodeStore.getAll(12, pageInfo.value, "", roomId.value);
   } else {
     const maxPage = Math.ceil(roomStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -363,19 +363,18 @@ onUnmounted(() => {
       </div>
       <!-- /Filter filial -->
       <BaseButton @click="filter" color="yellow">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="openModal" color="blue">
-        <PlusIcon class="h-5 w-5" />
+        <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
-
   </div>
 
-  <div v-else class="flex justify-between  items-center relative">
+  <div v-else class="flex justify-between  items-center relative pt-16">
     <h3 class="text-main text-xl font-semibold">Хона</h3>
     <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
@@ -432,13 +431,13 @@ onUnmounted(() => {
       </div>
       <!-- /Filter filial -->
       <BaseButton @click="filter" color="yellow" class="w-1/2">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red" class="w-1/2">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="openModal" color="blue" class="w-1/2">
-        <PlusIcon class="h-5 w-5" />
+        <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>

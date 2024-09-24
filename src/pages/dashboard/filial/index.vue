@@ -1,9 +1,9 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useFilialStore } from "@/stores/filial";
 import { useRoute, useRouter } from "vue-router";
-import { ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, PlusIcon } from "@heroicons/vue/24/solid";
+import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { colFilial } from "@/components/constants/constants";
 import api from "@/plugins/axios";
@@ -33,6 +33,9 @@ const pageNum = ref(1);
 const titleFilial = ref("");
 const limit = 8;
 const filialId = ref("");
+const isLargeScreen = ref(window.innerWidth >= 760);
+const isMobile = ref(false);
+
 const form = reactive({
   img: "",
   title: "",
@@ -154,6 +157,7 @@ async function nextPage(item) {
 }
 
 async function filter() {
+  isMobile.value = false;
   pageNum.value = 1;
   router.push({
     name: "filial",
@@ -215,6 +219,10 @@ function closeInfo() {
   isInfo.value = false;
 }
 
+function openModal() {
+  isMobile.value = false;
+  showModal.value = true;
+}
 
 function clear() {
   titleFilial.value = "";
@@ -226,9 +234,14 @@ function clear() {
   filialStore.get(limit, pageNum.value, titleFilial.value);
 }
 
+function handleResize() {
+  isLargeScreen.value = window.innerWidth > 760;
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
+    window.addEventListener('resize', handleResize);
     const queryPage = Number(route.query.page) || 1;
     const queryFilialTitle = route.query.filial || "";
 
@@ -239,11 +252,15 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <template>
   <!-- Header Category -->
-  <div class="flex items-center justify-between pb-4">
+  <div v-if="isLargeScreen" class="flex items-center justify-between pb-4">
     <h3 class="text-main text-xl font-semibold">Филиал</h3>
     <div class="flex items-center gap-4">
       <!-- Filter title -->
@@ -252,12 +269,36 @@ onMounted(async () => {
         placeholder="Филиал номи" v-model="titleFilial" />
 
       <BaseButton @click="filter" color="yellow">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="blue">
+      <BaseButton @click="openModal" color="blue">
+        <PlusIcon class="h-5 w-5" />
+      </BaseButton>
+    </div>
+  </div>
+
+  <div v-else class="flex justify-between  items-center relative">
+    <h3 class="text-main text-xl font-semibold">Филиал</h3>
+    <BaseButton @click="isMobile = true">
+      <Bars3Icon class="h-5 w-5" />
+    </BaseButton>
+    <div v-if="isMobile"
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-1/2 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        placeholder="Филиал номи" v-model="titleFilial" />
+
+      <BaseButton @click="filter" color="yellow" class="w-1/2">
+        <MagnifyingGlassIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red" class="w-1/2">
+        <XMarkIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="openModal" color="blue" class="w-1/2">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>

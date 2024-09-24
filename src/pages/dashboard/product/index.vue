@@ -1,6 +1,6 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
-import { ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, PlusIcon } from "@heroicons/vue/24/solid";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
+import { Bars3Icon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useProductStore } from "@/stores/product";
@@ -36,6 +36,8 @@ const titleProduct = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
 const limit = 8;
+const isLargeScreen = ref(window.innerWidth >= 760);
+const isMobile = ref(false);
 
 const form = reactive({
   img: "",
@@ -102,6 +104,7 @@ function resetForm() {
 async function openModal() {
   await categoryStore.get(0);
   showModal.value = true;
+  isMobile.value = false;
 }
 
 function closeModal() {
@@ -152,6 +155,7 @@ async function nextPage(item) {
 }
 
 async function filter() {
+  isMobile.value = false;
   pageNum.value = 1;
   router.push({
     name: "product",
@@ -224,9 +228,14 @@ function closeInfo() {
   isInfo.value = false;
 }
 
+function handleResize() {
+  isLargeScreen.value = window.innerWidth > 760;
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
+    window.addEventListener('resize', handleResize);
     const queryPage = route.query.page || 1;
     const queryProduct = route.query.product || "";
 
@@ -237,10 +246,14 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 <template>
   <!-- Header Product -->
-  <div class="flex items-center justify-between pb-4">
+  <div v-if="isLargeScreen" class="flex items-center justify-between pb-4">
     <h3 class="text-main text-xl font-semibold">Маҳсулот</h3>
     <div class="flex items-center gap-4">
       <!-- Filter title -->
@@ -249,12 +262,35 @@ onMounted(async () => {
         placeholder="Маҳсулот номи" v-model="titleProduct" />
       <!-- /Filter title -->
       <BaseButton @click="filter" color="yellow">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="showModal = true" color="blue">
+        <PlusIcon class="h-4 w-4" />
+      </BaseButton>
+    </div>
+  </div>
+  <div v-else class="flex justify-between  items-center relative pt-16">
+    <h3 class="text-main text-xl font-semibold">Маҳсулот</h3>
+    <BaseButton @click="isMobile = true">
+      <Bars3Icon class="h-5 w-5" />
+    </BaseButton>
+    <div v-if="isMobile"
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-1/2 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        placeholder="Маҳсулот номи" v-model="titleProduct" />
+
+      <BaseButton @click="filter" color="yellow" class="w-1/2">
+        <MagnifyingGlassIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red" class="w-1/2">
+        <XMarkIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="openModal" color="blue" class="w-1/2">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>

@@ -1,12 +1,12 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, TrashIcon, EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
 import { QrcodeStream } from 'vue-qrcode-reader'
 import api from "@/plugins/axios";
@@ -43,7 +43,9 @@ const placeholder = ref("Кафедрани танланг");
 const errorEl = ref('')
 const isCameraActive = ref(false)
 const selectedConstraints = ref({ facingMode: 'environment' })
-const currentIndex = ref(null); // Hozirgi indexni saqlash
+const currentIndex = ref(null);
+const isLargeScreen = ref(window.innerWidth >= 760);
+const isMobile = ref(false);
 
 const form = reactive({
   employee: "",
@@ -94,6 +96,7 @@ function resetForm() {
 
 async function synchronAll() {
   await employeeStore.patch();
+  isMobile.value = false;
 }
 
 function submitForm() {
@@ -185,6 +188,7 @@ async function filter() {
     titleEmployee.value,
     codeDepartment.value,
   );
+  isMobile.value = false;
 }
 
 async function filterDepartment() {
@@ -199,6 +203,7 @@ async function filterDepartment() {
     titleEmployee.value,
     codeDepartment.value,
   );
+  isMobile.value = false;
 }
 
 async function openInfo(id) {
@@ -293,10 +298,10 @@ async function onDetect(detectedCodes) {
     }
 
     const { product, room } = qrCodeStore.qrcodeById;
-
+    await productStore.getProductById(product._id);
     if (currentIndex.value !== null) {
       form.inventories[currentIndex.value].room = room._id;
-      form.inventories[currentIndex.value].product = product._id;
+      form.inventories[currentIndex.value].product = productStore.productById?.title
       form.inventories[currentIndex.value]._id = id;
     }
 
@@ -325,9 +330,14 @@ function switchCamera() {
       : { facingMode: 'environment' }
 }
 
+function handleResize() {
+  isLargeScreen.value = window.innerWidth > 760;
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
+    window.addEventListener('resize', handleResize);
     const queryPage = route.query.page || 1;
     const queryTitle = route.query.employee;
     const queryCode = route.query.code;
@@ -345,30 +355,64 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 <template>
   <!-- Header Product -->
-  <div class="flex items-center justify-between pb-2 pt-16 lg:pt-0 relative">
+  <div v-if="isLargeScreen" class="flex items-center justify-between pb-2 relative">
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
     <div class="flex items-center gap-4">
       <!-- Filter Department -->
       <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" v-model="codeDepartment"
-        @update:model-value="filterDepartment" class="w-40 lg:w-64" />
+        @update:model-value="filterDepartment" class="w-64" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-20 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
+        class="text-main focus:border-main w-640 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
         placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
       <!-- /Filter title -->
 
       <BaseButton @click="filter" color="yellow">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click.prevent="synchronAll()" color="blue">
+        <ArrowPathIcon class="h-4 w-4" />
+      </BaseButton>
+    </div>
+  </div>
+
+  <div v-else class="flex justify-between  items-center relative pt-16">
+    <h3 class="text-main text-xl font-semibold">Ходим</h3>
+    <BaseButton @click="isMobile = true">
+      <Bars3Icon class="h-5 w-5" />
+    </BaseButton>
+    <div v-if="isMobile"
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <!-- Filter Department -->
+      <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" v-model="codeDepartment"
+        @update:model-value="filterDepartment" class="w-full" />
+      <!-- /Filter Department -->
+
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-full rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
+        placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
+      <!-- /Filter title -->
+
+      <BaseButton @click="filter" color="yellow" class="w-1/2">
+        <MagnifyingGlassIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red" class="w-1/2">
+        <XMarkIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click.prevent="synchronAll()" color="blue" class="w-1/2">
         <ArrowPathIcon class="h-5 w-5" />
       </BaseButton>
     </div>
@@ -393,28 +437,16 @@ onMounted(async () => {
       <!-- Edite Modal -->
       <template #body>
         <BaseForm>
-          <div class="col-span-4 flex max-h-96 flex-col items-end">
-            <div class="grid w-full grid-cols-11 gap-4 font-semibold text-[#718EBF]">
-              <h4 class="col-span-1">Синхрон</h4>
-              <h4 class="col-span-3">Маҳсулот</h4>
-              <h4 class="col-span-3">Хона</h4>
-              <h4 class="col-span-3">Қр Код</h4>
-            </div>
-            <div v-for="(item, index) in form.inventories" class="grid w-full grid-cols-11 items-baseline gap-4">
-              <div class="col-span-1 flex items-baseline">
+          <div class="flex flex-col gap-4 items-end">
+            <div v-for="(item, index) in form.inventories" class="flex w-full  items-baseline gap-4">
+              <div class=" flex gap-4 items-baseline">
                 <BaseButton @click.prevent="openCamera(index)" color="blue">
-                  <EyeIcon class="relative h-3.5 w-3.5" />
+                  <EyeIcon class="relative h-5 w-5" />
                 </BaseButton>
-              </div>
-              <BaseInput placeholder="Маҳсулот" :data="productStore.products" class="col-span-3"
-                v-model="item.product" />
-              <BaseInput placeholder="Хона" :data="roomStore.rooms" class="col-span-3" v-model="item.room" />
-              <BaseInput placeholder="Қр Код" :data="qrCodeStore.qrCodes" class="col-span-3" v-model="item._id" />
-              <div class="col-span-1 mb-2 flex items-center">
-                <button @click.prevent="removeInvoice(item)"
-                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
-                  <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-                </button>
+                <BaseButton @click.prevent="removeInvoice(item)" color="red">
+                  <TrashIcon class="relative h-5 w-5 text-red-600" />
+                </BaseButton>
+                <p class="text-xl">{{ item.product }}</p>
               </div>
             </div>
             <div class="w-full">

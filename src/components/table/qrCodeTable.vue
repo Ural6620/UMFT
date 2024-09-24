@@ -39,7 +39,6 @@ async function deleteEmployee(item) {
   form.price = item.price;
   form.invoice = item.invoice?._id;
   form.product = item.product?._id;
-  console.log(form);
   await qrCodeStore.updateQrCode(form)
 }
 </script>

@@ -44,10 +44,10 @@ function handleMain(item) {
         @click="handleMain(item)">
         <td class="py-2 pl-6">{{ (page - 1) * limit + (index + 1) }}</td>
         <td class="px-6 py-2">{{ item.title }}</td>
-        <td class="px-6 py-2">{{ item.description }}</td>
+        <td class="px-6 py-2 truncate">{{ item.description }}</td>
         <td class="px-6 py-2">{{ item.count }}</td>
-        <td class="px-6 py-2">{{ item.summa.toLocaleString() + " сум" }}</td>
-        <td class="px-6 py-2">
+        <td class="px-6 py-2 truncate">{{ item.summa.toLocaleString() + " сум" }}</td>
+        <td class="px-6 py-2 truncate">
           {{ item.status === 1 ? "Фаол" : "Фаол эмас" }}
         </td>
         <td class="px-6 py-2">{{ item.file?.length }}</td>

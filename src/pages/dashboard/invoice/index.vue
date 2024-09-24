@@ -1,12 +1,12 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useInvoiceStore } from "@/stores/invoice";
 import { useProductStore } from "@/stores/product";
 import { useRoomStore } from "@/stores/room";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoute, useRouter } from "vue-router";
-import { TrashIcon, ArchiveBoxXMarkIcon, ArchiveBoxArrowDownIcon, ArrowDownOnSquareIcon, PlusIcon } from "@heroicons/vue/24/solid";
+import { TrashIcon, ArrowDownOnSquareIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/vue/24/solid";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
 import DeleteModal from "@/components/ui/DeleteModal.vue";
@@ -41,6 +41,8 @@ const pageNum = ref(1);
 const titleInvoice = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
+const isLargeScreen = ref(window.innerWidth >= 760);
+const isMobile = ref(false);
 
 const form = reactive({
   title: "",
@@ -261,6 +263,7 @@ function filter() {
     query: { page: 1, invoice: titleInvoice.value },
   });
   invoiceStore.get(limit, pageNum.value, titleInvoice.value);
+  isMobile.value = false;
 }
 
 function clear() {
@@ -327,12 +330,22 @@ function closeInfo() {
   isInfo.value = false;
 }
 
+
+function openModal() {
+  isMobile.value = false;
+  showModal.value = true;
+}
+
+function handleResize() {
+  isLargeScreen.value = window.innerWidth > 760;
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
+    window.addEventListener('resize', handleResize);
     const queryPage = Number(route.query.page) || 1;
     const queryInvoice = route.query.invoice || "";
-
     pageNum.value = Number(queryPage);
     titleInvoice.value = queryInvoice;
     await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
@@ -340,11 +353,15 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <template>
   <!-- Header Product -->
-  <div class="flex items-center justify-between pb-4">
+  <div v-if="isLargeScreen" class="flex items-center justify-between pb-4">
     <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
     <div class="flex items-center gap-4">
       <!-- Filter title -->
@@ -354,12 +371,36 @@ onMounted(async () => {
       <!-- /Filter title -->
 
       <BaseButton @click="filter" color="yellow">
-        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+        <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
       <BaseButton @click="clear" color="red">
-        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="blue">
+      <BaseButton @click="openModal" color="blue">
+        <PlusIcon class="h-4 w-4" />
+      </BaseButton>
+    </div>
+  </div>
+
+  <div v-else class="flex justify-between  items-center relative pt-16">
+    <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
+    <BaseButton @click="isMobile = true">
+      <Bars3Icon class="h-5 w-5" />
+    </BaseButton>
+    <div v-if="isMobile"
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <!-- Filter title -->
+      <input type="number"
+        class="text-main focus:border-main w-1/2 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        placeholder="Фактура рақами" v-model="titleInvoice" />
+
+      <BaseButton @click="filter" color="yellow" class="w-1/2">
+        <MagnifyingGlassIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red" class="w-1/2">
+        <XMarkIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="openModal" color="blue" class="w-1/2">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
