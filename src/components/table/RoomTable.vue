@@ -24,7 +24,7 @@ function handleMain(item) {
   <table class="relative w-full text-left">
     <thead class="sticky top-0 font-medium text-[#718EBF] z-10">
       <tr>
-        <th scope="col" class="px-6 py-3" v-for="column in columns">
+        <th scope="col" class="px-6 py-3 truncate" v-for="column in columns">
           {{ column.name }}
         </th>
       </tr>
@@ -33,13 +33,13 @@ function handleMain(item) {
       <tr class="cursor-pointer border-t bg-white  hover:bg-[#f5f5f5]" v-for="(item, index) in data"
         @click="handleMain(item)">
         <td class="pl-6">{{ (props.page - 1) * limit + index + 1 }}</td>
-        <td class="px-6 py-1">{{ item.title }}</td>
+        <td class="px-6 py-1 truncate">{{ item.title }}</td>
         <td class="px-6 py-1">{{ item.number }}</td>
-        <td class="px-6 py-1">{{ item.filial?.title }}</td>
-        <td class="px-6 py-1">
+        <td class="px-6 py-1 truncate">{{ item.filial?.title }}</td>
+        <td class="px-6 py-1 truncate">
           {{ item.type === 1 ? "Ўқув хонаси" : "Маиший хона" }}
         </td>
-        <td class="px-6 py-1">
+        <td class="px-6 py-1 truncate">
           {{ item.status === 1 ? "Фаол" : "Фаол эмас" }}
         </td>
         <td class="flex items-center justify-end gap-4 px-4 py-1">

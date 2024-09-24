@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { ChevronDownIcon, PlusIcon, ArchiveBoxArrowDownIcon, ArchiveBoxXMarkIcon, Bars3Icon } from "@heroicons/vue/24/solid";
 import { useAuthStore } from "@/stores/auth";
 import { useRoomStore } from "@/stores/room";
@@ -41,6 +41,8 @@ const orderRoom = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
 const limit = 15;
+const isLargeScreen = ref(window.innerWidth >= 760);
+const isMobile = ref(false)
 
 const form = reactive({
   title: "",
@@ -103,6 +105,10 @@ async function openDelete(id) {
   await roomStore.getRoomById(id);
   isDelete.value = true;
 }
+function openModal() {
+  isMobile.value = false;
+  showModal.value = true;
+}
 
 async function goPage(n, item) {
   if (item === "info") {
@@ -158,6 +164,8 @@ async function nextPage(item) {
 }
 
 async function filterFilial(item) {
+  isFilial.value = false;
+  isMobile.value = false;
   pageNum.value = 1;
   filialId.value = item._id || "";
   filialSelect.value = item.title || "Барча филиаллар";
@@ -182,6 +190,7 @@ async function filterFilial(item) {
 }
 
 async function filter() {
+  isMobile.value = false;
   pageNum.value = 1;
   router.push({
     name: "rooms",
@@ -271,9 +280,14 @@ function clear() {
   roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value);
 }
 
+function handleResize() {
+  isLargeScreen.value = window.innerWidth > 760;
+}
+
 onMounted(async () => {
   await authStore.checkAuth();
   if (authStore.isAuthenticated) {
+    window.addEventListener('resize', handleResize);
     await filialStore.get(0);
     const queryPage = Number(route.query.page) || 1;
     const queryRoom = route.query.room || "";
@@ -288,12 +302,16 @@ onMounted(async () => {
     console.error("Autentifikatsiya muvaffaqiyatsiz");
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <template>
   <!-- Room Header section -->
-  <div class="flex items-center justify-between pb-4 relative">
-    <h3 class="text-main text-xl font-semibold">Хона</h3>
+  <div v-if="isLargeScreen" class="flex items-center justify-between pb-4 relative">
+    <h3 class="text-main text-xl font-semibold hidden lg:block">Хона</h3>
     <div class="flex  items-center gap-2 lg:gap-4">
       <!-- Filter title -->
       <input type="text"
@@ -308,7 +326,7 @@ onMounted(async () => {
       <!-- /Filter title --
 
         <!-- Filter filial -->
-      <div class="relative w-32 transition-all duration-1000 lg:w-48">
+      <div class="relative w-32 transition-all duration-1000 lg:w-48 z-50">
         <button type="button" @click="isFilial = !isFilial"
           class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-6 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
           aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
@@ -350,13 +368,79 @@ onMounted(async () => {
       <BaseButton @click="clear" color="red">
         <ArchiveBoxXMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="blue">
+      <BaseButton @click="openModal" color="blue">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
-    <BaseButton color="" class="lg:hidden">
+
+  </div>
+
+  <div v-else class="flex justify-between  items-center relative">
+    <h3 class="text-main text-xl font-semibold">Хона</h3>
+    <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
     </BaseButton>
+    <div v-if="isMobile"
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-full truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-48"
+        placeholder="Хона номи" v-model="titleRoom" />
+      <!-- /Filter title -->
+
+      <!-- Filter title -->
+      <input type="text"
+        class="text-main focus:border-main w-full truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-48"
+        placeholder="Хона рақами" v-model="orderRoom" />
+      <!-- /Filter title --
+
+        <!-- Filter filial -->
+      <div class="relative w-full transition-all duration-1000 lg:w-48 z-10">
+        <button type="button" @click="isFilial = !isFilial"
+          class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-6 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
+          aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+          <span class="flex items-center justify-between">
+            <span class="block truncate text-[#8BA3CB]">{{
+              filialSelect
+            }}</span>
+            <ChevronDownIcon class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
+              :class="isFilial ? 'rotate-180 transform' : ''" />
+          </span>
+        </button>
+        <ul v-show="isFilial"
+          class="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
+          <li
+            class="relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+            id="listbox-option-0" role="option" @click="filterFilial({ _id: '', title: 'Барча филиаллар' })">
+            <div class="group flex cursor-pointer items-center">
+              <span class="group-hover:text-main ml-3 block truncate font-normal text-[#8BA3CB] transition ease-linear">
+                Барча филиаллар
+              </span>
+            </div>
+          </li>
+          <li
+            class="relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+            id="listbox-option-0" role="option" v-for="item in filialStore.filials" @click="filterFilial(item)">
+            <div class="group flex cursor-pointer items-center">
+              <span class="group-hover:text-main ml-3 block truncate font-normal text-[#8BA3CB] transition ease-linear">
+                {{ item.title }}
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <!-- /Filter filial -->
+      <BaseButton @click="filter" color="yellow" class="w-1/2">
+        <ArchiveBoxArrowDownIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="clear" color="red" class="w-1/2">
+        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+      </BaseButton>
+      <BaseButton @click="openModal" color="blue" class="w-1/2">
+        <PlusIcon class="h-5 w-5" />
+      </BaseButton>
+    </div>
   </div>
   <!-- /Room Header section -->
 
