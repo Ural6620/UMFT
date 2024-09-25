@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { PlusIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from "@heroicons/vue/24/solid";
@@ -21,7 +20,6 @@ const route = useRoute();
 const router = useRouter();
 const categoryStore = useCategoryStore();
 const qrCodeStore = useQrCodeStore();
-const authStore = useAuthStore();
 const showModal = ref(false);
 const isDelete = ref(false);
 const isInfo = ref(false);
@@ -258,21 +256,16 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = route.query.page;
-    const queryTitle = route.query.title;
-    pageNum.value = Number(queryPage) || 1;
-    titleCategory.value = queryTitle || "";
-    await router.push({
-      name: "category",
-      query: { page: pageNum.value, title: titleCategory.value },
-    });
-    await categoryStore.get(limit, pageNum.value, titleCategory.value);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  const queryPage = route.query.page;
+  const queryTitle = route.query.title;
+  pageNum.value = Number(queryPage) || 1;
+  titleCategory.value = queryTitle || "";
+  await router.push({
+    name: "category",
+    query: { page: pageNum.value, title: titleCategory.value },
+  });
+  await categoryStore.get(limit, pageNum.value, titleCategory.value);
 });
 
 onUnmounted(() => {

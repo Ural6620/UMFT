@@ -1,7 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
@@ -19,11 +18,9 @@ import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
-import BaseInput from "@/components/form/BaseInput.vue";
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const employeeStore = useEmployeeStore();
 const roomStore = useRoomStore();
 const productStore = useProductStore();
@@ -265,7 +262,7 @@ function clear() {
 }
 
 function openCamera(index) {
-  currentIndex.value = index; // Hozirgi indexni belgilash
+  currentIndex.value = index;
   isCameraActive.value = true;
   showModal.value = false;
 }
@@ -326,26 +323,27 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+
+function handleUpdate(newDepartment) {
+  codeDepartment.name = newDepartment.name;
+  codeDepartment.code = newDepartment.code;
+}
+
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = route.query.page || 1;
-    const queryTitle = route.query.employee;
-    const queryCode = route.query.code;
-    pageNum.value = queryPage;
-    titleEmployee.value = queryTitle;
-    codeDepartment.code = queryCode;
-    await employeeStore.get(
-      limit,
-      pageNum.value,
-      titleEmployee.value,
-      codeDepartment.code,
-    );
-    await employeeStore.getDepartment();
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  const queryPage = route.query.page || 1;
+  const queryTitle = route.query.employee;
+  const queryCode = route.query.code;
+  pageNum.value = queryPage;
+  titleEmployee.value = queryTitle;
+  codeDepartment.code = queryCode;
+  await employeeStore.get(
+    limit,
+    pageNum.value,
+    titleEmployee.value,
+    codeDepartment.code,
+  );
+  await employeeStore.getDepartment();
 });
 
 onUnmounted(() => {
@@ -358,8 +356,8 @@ onUnmounted(() => {
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
     <div class="flex items-center gap-4">
       <!-- Filter Department -->
-      <SelectDepartment :placeholder="codeDepartment.name" :data="employeeStore.departments" @code="codeDepartment.code"
-        @name="codeDepartment.name" class="w-64" />
+      <SelectDepartment :placeholder="codeDepartment" :data="employeeStore.departments" class="w-64"
+        @update="handleUpdate" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->
@@ -388,8 +386,8 @@ onUnmounted(() => {
     <div v-if="isMobile"
       class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
       <!-- Filter Department -->
-      <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" @code="codeDepartment.code"
-        @name="codeDepartment.name" class="w-full" />
+      <SelectDepartment :placeholder="codeDepartment" :data="employeeStore.departments" class="w-64"
+        @update="handleUpdate" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->

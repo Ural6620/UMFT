@@ -90,7 +90,8 @@ const links = [
     },
     props: route => ({
       pageNum: route.query.page || 1,
-      titleProduct: route.query.code || ''
+      titleProduct: route.query.product || '',
+      titleRoom: route.query.room || ''
     })
   },
 ];

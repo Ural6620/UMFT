@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { saveAs } from "file-saver";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
@@ -15,6 +15,7 @@ import BaseModal from "@/components/ui/BaseModal.vue";
 import SelectFilial from "@/components/form/SelectFilial.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
+import SelectQr from "@/components/form/selectQr.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -27,11 +28,18 @@ const urlQrCode = ref("");
 const qrCode = ref("");
 const pageNum = ref(1);
 const limit = 30;
-const orderRoom = ref("");
-const titleProduct = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
 const isDownloadModal = ref(false);
+const titleProduct = reactive({
+  _id: "",
+  title: "Маҳсулотни танланг"
+})
+
+const titleRoom = reactive({
+  _id: "",
+  title: "Хонани танланг"
+})
 
 async function downloadFile(item) {
   try {
@@ -60,7 +68,7 @@ function openDownload() {
 
 async function downloadAllFiles() {
   isMobile.value = false;
-  await qrCodeStore.getAll(0, 1, titleProduct.value, orderRoom.value);
+  await qrCodeStore.getAll(0, 1, titleProduct._id, titleRoom._id);
   const zip = new JSZip();
   const folder = zip.folder("qr_codes");
   try {
@@ -79,10 +87,10 @@ async function downloadAllFiles() {
   } catch (error) {
     console.error("Fayllarni yuklashda xatolik yuz berdi:", error);
   }
-  titleProduct.value = "";
-  orderRoom.value = "";
+  titleProduct._id = "";
+  titleRoom._id = "";
   pageNum.value = 1;
-  await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
   isDownloadModal.value = false;
 
 }
@@ -110,12 +118,13 @@ function closeFileModal() {
 
 async function filter() {
   pageNum.value = 1;
+  console.log(titleProduct._id, titleRoom._id)
+  console.log(titleProduct.title, titleRoom.title)
   await qrCodeStore.getAll(
     limit,
     pageNum.value,
-    titleProduct.value,
-    orderRoom.value,
-  );
+    titleProduct._id,
+    titleRoom._id);
   isMobile.value = false;
 }
 
@@ -123,9 +132,9 @@ async function goPage(n) {
   pageNum.value = n;
   await router.push({
     name: "qrCode",
-    query: { page: pageNum.value, code: titleProduct.value },
+    query: { page: pageNum.value, code: titleProduct._id },
   });
-  await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
 }
 
 async function prewPage() {
@@ -145,34 +154,43 @@ async function nextPage() {
 
 
 function clear() {
-  titleProduct.value = "";
-  orderRoom.value = "";
+  titleProduct._id = "";
+  titleRoom._id = "";
+  titleProduct.title = "Маҳсулотни танланг";
+  titleRoom.title = "Хонани танланг";
   pageNum.value = 1;
   router.push({
     name: "qrCode",
-    query: { page: pageNum.value, code: titleProduct.value },
+    query: { page: pageNum.value, code: titleProduct._id },
   });
-  qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
+  qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
 }
 
 function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+function handleProduct(newProduct) {
+  titleProduct._id = newProduct._id;
+  titleProduct.title = newProduct.title;
+}
+
+function handleRoom(newRoom) {
+  titleRoom._id = newRoom._id;
+  titleRoom.title = newRoom.title;
+}
+
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = route.query.page || 1;
-    const queryTitle = route.query.code;
-    pageNum.value = Number(queryPage) || 1;
-    titleProduct.value = queryTitle || "";
-    await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
-    await roomStore.get(0);
-    await productStore.get(0);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  const queryPage = route.query.page || 1;
+  const queryProduct = route.query.product || '';
+  const queryRoom = route.query.room || '';
+  pageNum.value = Number(queryPage) || 1;
+  titleProduct._id = queryProduct || "";
+  titleRoom._id = queryRoom || "";
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id, titleRoom._id);
+  await roomStore.get(0);
+  await productStore.get(0);
 });
 
 onUnmounted(() => {
@@ -185,12 +203,11 @@ onUnmounted(() => {
     <h3 class="text-main text-xl font-semibold">Қр Код</h3>
     <div class="flex items-baseline gap-4">
       <!-- Filter Qr Code -->
-      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-52"
-        v-model="titleProduct" />
+      <SelectQr :placeholder="titleProduct" :data="productStore.products" class="w-52" @update="handleProduct" />
       <!-- /Filter Qr Code -->
 
       <!-- Filter Room -->
-      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-52" v-model="orderRoom" />
+      <SelectQr :placeholder="titleRoom" :data="roomStore.rooms" class="w-52" @update="handleRoom" />
       <!-- /Filter Room -->
 
       <!-- Download all qrCode -->
@@ -216,12 +233,11 @@ onUnmounted(() => {
     <div v-if="isMobile"
       class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
       <!-- Filter Qr Code -->
-      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-full"
-        v-model="titleProduct" />
+      <SelectQr :placeholder="titleProduct" :data="productStore.products" class="w-full" @update="handleProduct" />
       <!-- /Filter Qr Code -->
 
       <!-- Filter Room -->
-      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-full" v-model="orderRoom" />
+      <SelectQr :placeholder="titleRoom" :data="roomStore.rooms" class="w-full" @update="handleRoom" />
       <!-- /Filter Room -->
       <BaseButton @click="filter" color="blue" class="w-1/2">
         <MagnifyingGlassIcon class="h-5 w-5" />

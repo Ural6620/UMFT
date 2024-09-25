@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
 import { useFilialStore } from "@/stores/filial";
 import { useRoute, useRouter } from "vue-router";
 import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
@@ -20,7 +19,6 @@ import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
 const route = useRoute();
 const router = useRouter();
 const filialStore = useFilialStore();
-const authStore = useAuthStore();
 const qrCodeStore = useQrCodeStore();
 const showModal = ref(false);
 const isDelete = ref(false);
@@ -240,18 +238,13 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = Number(route.query.page) || 1;
-    const queryFilialTitle = route.query.filial || "";
+  window.addEventListener('resize', handleResize);
+  const queryPage = Number(route.query.page) || 1;
+  const queryFilialTitle = route.query.filial || "";
 
-    pageNum.value = queryPage;
-    titleFilial.value = queryFilialTitle;
-    await filialStore.get(limit, pageNum.value, titleFilial.value);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  pageNum.value = queryPage;
+  titleFilial.value = queryFilialTitle;
+  await filialStore.get(limit, pageNum.value, titleFilial.value);
 });
 
 onUnmounted(() => {

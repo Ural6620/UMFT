@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
 import { useFilialStore } from "@/stores/filial";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
@@ -11,7 +10,6 @@ import { useCategoryStore } from "@/stores/category";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const authStore = useAuthStore();
 const filialStore = useFilialStore();
 const roomStore = useRoomStore();
 const productStore = useProductStore();
@@ -21,24 +19,16 @@ const employeeStore = useEmployeeStore();
 const categoryStore = useCategoryStore();
 
 onMounted(async () => {
-  try {
-    await authStore.checkAuth();
-    if (authStore.isAuthenticated) {
-      await Promise.all([
-        filialStore.get(0),
-        roomStore.get(0),
-        productStore.get(0),
-        invoiceStore.get(0),
-        qrCodeStore.getAll(0),
-        employeeStore.get(0),
-        categoryStore.get(0),
-      ]);
-    } else {
-      console.error("Autentifikatsiya muvaffaqiyatsiz");
-    }
-  } catch (error) {
-    console.error("Xato ro'y berdi: ", error);
-  }
+  await Promise.all([
+    filialStore.get(0),
+    roomStore.get(0),
+    productStore.get(0),
+    invoiceStore.get(0),
+    qrCodeStore.getAll(0),
+    employeeStore.get(0),
+    categoryStore.get(0),
+  ]);
+
 });
 </script>
 

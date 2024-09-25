@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
 import { useInvoiceStore } from "@/stores/invoice";
 import { useProductStore } from "@/stores/product";
 import { useRoomStore } from "@/stores/room";
@@ -24,7 +23,6 @@ import { colInvoice } from "@/components/constants/constants";
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const invoiceStore = useInvoiceStore();
 const productStore = useProductStore();
 const roomStore = useRoomStore();
@@ -352,17 +350,12 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = Number(route.query.page) || 1;
-    const queryInvoice = route.query.invoice || "";
-    pageNum.value = Number(queryPage);
-    titleInvoice.value = queryInvoice;
-    await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  const queryPage = Number(route.query.page) || 1;
+  const queryInvoice = route.query.invoice || "";
+  pageNum.value = Number(queryPage);
+  titleInvoice.value = queryInvoice;
+  await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
 });
 
 onUnmounted(() => {

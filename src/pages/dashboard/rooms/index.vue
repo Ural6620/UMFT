@@ -1,7 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { ChevronDownIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/vue/24/solid";
-import { useAuthStore } from "@/stores/auth";
 import { useRoomStore } from "@/stores/room";
 import { useFilialStore } from "@/stores/filial";
 import { useQrCodeStore } from "@/stores/qrCode";
@@ -22,7 +21,6 @@ import Pagination from "@/components/ui/Pagination.vue";
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const roomStore = useRoomStore();
 const filialStore = useFilialStore();
 const qrCodeStore = useQrCodeStore();
@@ -286,22 +284,17 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    await filialStore.get(0);
-    const queryPage = Number(route.query.page) || 1;
-    const queryRoom = route.query.room || "";
-    const queryFilialId = route.query.filial || "";
-    const queryFilialTitle = route.query.filialTitle || "Филиални танлаш";
-    pageNum.value = queryPage;
-    titleRoom.value = queryRoom;
-    filialId.value = queryFilialId;
-    filialSelect.value = queryFilialTitle;
-    await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  await filialStore.get(0);
+  const queryPage = Number(route.query.page) || 1;
+  const queryRoom = route.query.room || "";
+  const queryFilialId = route.query.filial || "";
+  const queryFilialTitle = route.query.filialTitle || "Филиални танлаш";
+  pageNum.value = queryPage;
+  titleRoom.value = queryRoom;
+  filialId.value = queryFilialId;
+  filialSelect.value = queryFilialTitle;
+  await roomStore.get(limit, pageNum.value, titleRoom.value, filialId.value);
 });
 
 onUnmounted(() => {

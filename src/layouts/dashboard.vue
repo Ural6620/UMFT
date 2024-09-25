@@ -1,5 +1,13 @@
 <script setup>
 import Sidebar from "@/components/layout/dashboard/Sidebar.vue";
+import { useAuthStore } from "@/stores/auth";
+import { onMounted } from "vue";
+const authStore = useAuthStore();
+onMounted(async () => {
+  if (!authStore.token) {
+    authStore.logout();
+  }
+})
 </script>
 <template>
   <div class="flex h-screen w-screen flex-col-reverse overflow-hidden lg:flex-row">

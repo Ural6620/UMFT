@@ -2,7 +2,6 @@
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { Bars3Icon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import { useProductStore } from "@/stores/product";
 import { useCategoryStore } from "@/stores/category";
 import { useQrCodeStore } from "@/stores/qrCode";
@@ -21,9 +20,8 @@ import Pagination from "@/components/ui/Pagination.vue";
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
-const productStore = useProductStore();
 const categoryStore = useCategoryStore();
+const productStore = useProductStore();
 const qrCodeStore = useQrCodeStore();
 const showModal = ref(false);
 const isDelete = ref(false);
@@ -234,18 +232,12 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await authStore.checkAuth();
-  if (authStore.isAuthenticated) {
-    window.addEventListener('resize', handleResize);
-    const queryPage = route.query.page || 1;
-    const queryProduct = route.query.product || "";
-
-    pageNum.value = Number(queryPage);
-    titleProduct.value = queryProduct;
-    await productStore.get(limit, pageNum.value, titleProduct.value);
-  } else {
-    console.error("Autentifikatsiya muvaffaqiyatsiz");
-  }
+  window.addEventListener('resize', handleResize);
+  const queryPage = route.query.page || 1;
+  const queryProduct = route.query.product || "";
+  pageNum.value = Number(queryPage);
+  titleProduct.value = queryProduct;
+  await productStore.get(limit, pageNum.value, titleProduct.value);
 });
 
 onUnmounted(() => {
@@ -300,7 +292,7 @@ onUnmounted(() => {
 
   <!-- Table -->
   <div class="flex-1 overflow-auto rounded-2xl bg-white py-2">
-    <ProductTable :columns="colProduct" :data="productStore.products" @edite="handleEdite" @delete="openDelete"
+    <ProductTable :columns="colProduct" :data="productStore?.products" @edite="handleEdite" @delete="openDelete"
       :page="pageNum" :limit="limit" @main="openInfo" />
   </div>
   <!-- /Table -->
