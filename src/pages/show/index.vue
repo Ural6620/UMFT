@@ -37,13 +37,13 @@ onMounted(async () => {
               }}</span></p>
 
           <p class="text-black mt-2 text-center text-2xl font-bold">Ходим:</p>
-          <p class="text-gray-500">ФИО: <span class="text-black">{{ qrCodeStore?.qrcodeById?.employee?.full_name
-              }}</span>
+          <p class="text-gray-500">ФИО: <span class="text-black">{{ qrCodeStore?.qrcodeById?.employee ?
+            qrCodeStore?.qrcodeById?.employee?.full_name
+            : `Ходим бириктирилмаган` }}</span>
           </p>
           <div class="flex justify-between  ">
             <p class="text-gray-500">Расми: </p>
-            <img class="rounded-xl h-40 w-40 " :src="`${qrCodeStore?.qrcodeById?.employee?.image}`"
-              alt="Ходимга расм бириктирилмаган" />
+            <img class="rounded-xl h-40 w-40 " :src="`${qrCodeStore?.qrcodeById?.employee?.image}`" alt="Ходим расми" />
           </div>
         </div>
       </div>

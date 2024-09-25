@@ -1,4 +1,6 @@
 <script setup>
+import BaseButton from './BaseButton.vue';
+
 const props = defineProps({
   show: Boolean,
 });
@@ -9,9 +11,9 @@ const props = defineProps({
     <div v-if="show"
       class="fixed z-50 top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.5)] transition-all duration-300 ease-in flex">
       <div
-        class="modal-container w-4/5 m-auto px-5 py-8 bg-white rounded-2xl transition-all duration-300 ease-in shadow-[0_2px_8px_rgba(0,0,0,0.33)] divide-y">
-        <div class="modal-header text-xl pb-3">
-          <slot name="header">default header</slot>
+        class="modal-container w-full lg:w-4/5 m-auto px-5 py-8 bg-white rounded-2xl transition-all duration-300 ease-in shadow-[0_2px_8px_rgba(0,0,0,0.33)] divide-y">
+        <div class="modal-header text-xl pb-3 text-main">
+          <slot name="header"></slot>
         </div>
 
         <div class="modal-body py-4">
@@ -19,10 +21,7 @@ const props = defineProps({
         </div>
 
         <div class="w-full flex justify-end gap-2 pt-4">
-          <button class="w-32 rounded-md transition-all ease-linear py-1 text-red-600 bg-red-100 hover:bg-red-300 "
-            @click="$emit('close')">
-            Бекор қилиш
-          </button>
+          <BaseButton class="w-32" @click="$emit('close')">Бекор қилиш</BaseButton>
           <slot name="button" />
         </div>
       </div>

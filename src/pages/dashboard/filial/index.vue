@@ -5,7 +5,7 @@ import { useFilialStore } from "@/stores/filial";
 import { useRoute, useRouter } from "vue-router";
 import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { colFilial } from "@/components/constants/constants";
+import { colFilial, colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
@@ -31,7 +31,8 @@ const qrCode = ref("");
 const urlQrCode = ref("");
 const pageNum = ref(1);
 const titleFilial = ref("");
-const limit = 8;
+const limit = 12;
+const limitQrCode = 14;
 const filialId = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
@@ -116,7 +117,7 @@ function closeModal() {
 async function goPage(n, item) {
   if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", '', '', '', '', filialId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
   } else {
     pageNum.value = n;
     router.push({
@@ -132,7 +133,7 @@ async function prewPage(item) {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", '', '', '', '', filialId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -143,10 +144,10 @@ async function prewPage(item) {
 
 async function nextPage(item) {
   if (item === "info") {
-    if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
+    if (pageInfo.value < Math.ceil(qrCodeStore.count / limitQrCode)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", '', '', '', '', filialId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
   } else {
     const maxPage = Math.ceil(roomStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -169,7 +170,7 @@ async function openInfo(id) {
   isInfo.value = true;
   filialId.value = id;
   await filialStore.getFilialById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, "", "", '', '', '', '', filialId.value);
+  await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
 }
 async function downloadFile(item) {
   try {
@@ -265,17 +266,17 @@ onUnmounted(() => {
     <div class="flex items-center gap-4">
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        class="text-main focus:border-main w-56 rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Филиал номи" v-model="titleFilial" />
 
-      <BaseButton @click="filter" color="yellow">
+      <BaseButton @click="filter" color="blue">
         <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="clear" color="red">
+      <BaseButton @click="clear" color="orange">
         <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="openModal" color="blue">
-        <PlusIcon class="h-5 w-5" />
+      <BaseButton @click="openModal" color="green">
+        <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>
@@ -332,10 +333,9 @@ onUnmounted(() => {
         </BaseForm>
       </template>
       <template #button>
-        <button @click="submitForm"
-          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
+        <BaseButton class="w-32" @click="submitForm" color="green">
           Сақлаш
-        </button>
+        </BaseButton>
       </template>
     </BaseModal>
     <!-- /Add end Create Modal -->
@@ -360,18 +360,18 @@ onUnmounted(() => {
       <template #header>Filial: {{ filialStore.filialById?.title }}</template>
       <template #body>
         <div v-if="!qrCodeStore.qrCodes.length"
-          class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[640px]">
+          class="text-main overflow-auto rounded-2xl bg-white py-2 text-center h-96">
           Бу филиалга маҳсулот бириктирилмаган
         </div>
-        <div v-else class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]">
-          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+        <div v-else class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
+          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
             :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
         </div>
       </template>
       <template #footer>
         <!-- Pagination -->
-        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
-          @goPage="goPage($event, 'info')" />
+        <Pagination :page="pageInfo" :limit="limitQrCode" :data="qrCodeStore" @next="nextPage('info')"
+          @prew="prewPage('info')" @goPage="goPage($event, 'info')" />
         <!-- /Pagination-->
       </template>
     </InfoRoomModal>

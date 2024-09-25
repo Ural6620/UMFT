@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
-import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon } from "@heroicons/vue/24/solid";
+import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import JSZip from "jszip";
@@ -58,13 +58,9 @@ function openDownload() {
   isDownloadModal.value = true;
 }
 
-async function downloadAllFiles(item) {
+async function downloadAllFiles() {
   isMobile.value = false;
-  if (item === 'all') {
-    await qrCodeStore.getAll(0)
-  } else {
-    await qrCodeStore.getAll(0, 1, titleProduct.value, orderRoom.value);
-  }
+  await qrCodeStore.getAll(0, 1, titleProduct.value, orderRoom.value);
   const zip = new JSZip();
   const folder = zip.folder("qr_codes");
   try {
@@ -83,8 +79,12 @@ async function downloadAllFiles(item) {
   } catch (error) {
     console.error("Fayllarni yuklashda xatolik yuz berdi:", error);
   }
+  titleProduct.value = "";
+  orderRoom.value = "";
+  pageNum.value = 1;
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct.value);
-  isDownloadModal.value = false
+  isDownloadModal.value = false;
+
 }
 
 async function showFile(item) {
@@ -108,7 +108,7 @@ function closeFileModal() {
   showModal.value = false;
 }
 
-async function searchCode() {
+async function filter() {
   pageNum.value = 1;
   await qrCodeStore.getAll(
     limit,
@@ -145,7 +145,6 @@ async function nextPage() {
 
 
 function clear() {
-  isMobile.value = false;
   titleProduct.value = "";
   orderRoom.value = "";
   pageNum.value = 1;
@@ -182,32 +181,34 @@ onUnmounted(() => {
 </script>
 <template>
   <!-- Header Qr Code -->
-  <div v-if="isLargeScreen" class="flex items-center justify-between pb-4">
+  <div v-if="isLargeScreen" class="flex items-baseline justify-between pb-4">
     <h3 class="text-main text-xl font-semibold">Қр Код</h3>
-    <div class="flex items-center gap-4">
+    <div class="flex items-baseline gap-4">
       <!-- Filter Qr Code -->
-      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-52" v-model="titleProduct"
-        @update:modelValue="searchCode" />
+      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-52"
+        v-model="titleProduct" />
       <!-- /Filter Qr Code -->
 
       <!-- Filter Room -->
-      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-52" v-model="orderRoom"
-        @update:modelValue="searchCode" />
+      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-52" v-model="orderRoom" />
       <!-- /Filter Room -->
 
       <!-- Download all qrCode -->
       <div class="flex items-center justify-end gap-4">
-        <BaseButton @click="clear" color="red">
+        <BaseButton @click="filter" color="blue">
+          <MagnifyingGlassIcon class="h-4 w-4" />
+        </BaseButton>
+        <BaseButton @click="clear" color="orange">
           <XMarkIcon class="h-4 w-4" />
         </BaseButton>
-        <BaseButton @click="openDownload" color="blue">
+        <BaseButton @click="openDownload" color="green">
           <ArrowDownOnSquareStackIcon class="h-4 w-4" />
         </BaseButton>
       </div>
       <!-- /Download all qrCode -->
     </div>
   </div>
-  <div v-else class="flex justify-between items-center relative pt-16">
+  <div v-else class="flex justify-between items-center relative">
     <h3 class="text-main text-xl font-semibold">Қр Код</h3>
     <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
@@ -215,18 +216,20 @@ onUnmounted(() => {
     <div v-if="isMobile"
       class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
       <!-- Filter Qr Code -->
-      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-full" v-model="titleProduct"
-        @update:modelValue="searchCode" />
+      <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="w-full"
+        v-model="titleProduct" />
       <!-- /Filter Qr Code -->
 
       <!-- Filter Room -->
-      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-full" v-model="orderRoom"
-        @update:modelValue="searchCode" />
+      <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="w-full" v-model="orderRoom" />
       <!-- /Filter Room -->
-      <BaseButton @click="clear" color="red" class="w-1/2">
+      <BaseButton @click="filter" color="blue" class="w-1/2">
+        <MagnifyingGlassIcon class="h-5 w-5" />
+      </BaseButton>
+      <BaseButton @click="clear" color="orange" class="w-1/2">
         <XMarkIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="openDownload" color="blue" class="w-1/2">
+      <BaseButton @click="openDownload" color="green" class="w-1/2">
         <ArrowDownOnSquareStackIcon class="h-5 w-5" />
       </BaseButton>
     </div>
@@ -234,7 +237,7 @@ onUnmounted(() => {
   <!-- /Header Qr Code -->
 
   <!-- Table -->
-  <div class="overflow-auto rounded-2xl bg-white">
+  <div class="overflow-auto rounded-2xl bg-white flex-1">
     <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageNum" :limit="limit" @download="downloadFile"
       @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
   </div>
@@ -262,17 +265,17 @@ onUnmounted(() => {
       <template #body>
         <div class="flex flex-col gap-4 items-center justify-center p-20">
           <!-- Filter Qr Code -->
-          <SelectFilial placeholder="Маҳсулот буйича юклаш" :data="productStore.products" class="w-1/2"
-            v-model="titleProduct" @update:modelValue="downloadAllFiles" />
+          <SelectFilial placeholder="Маҳсулот буйича саралаш" :data="productStore.products" class="w-full lg:w-1/2"
+            v-model="titleProduct" />
           <!-- /Filter Qr Code -->
 
           <!-- Filter Room -->
-          <SelectFilial placeholder="Хона буйича юклаш" :data="roomStore.rooms" class="w-1/2" v-model="orderRoom"
-            @update:modelValue="downloadAllFiles" />
+          <SelectFilial placeholder="Хона буйича саралаш" :data="roomStore.rooms" class="w-full lg:w-1/2"
+            v-model="orderRoom" />
           <!-- /Filter Room -->
 
-          <BaseButton @click="downloadAllFiles('all')" color="blue" class="w-1/2">
-            Барча Қр Кодларни юклаш
+          <BaseButton @click="downloadAllFiles()" color="blue" class="w-full lg:w-1/2">
+            Қр Кодларни юклаш
           </BaseButton>
 
         </div>

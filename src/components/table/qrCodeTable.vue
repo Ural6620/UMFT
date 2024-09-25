@@ -43,7 +43,7 @@ async function deleteEmployee(item) {
 }
 </script>
 <template>
-  <table class="relative w-full text-left">
+  <table class="relative w-full text-left text-base">
     <thead class="sticky top-0 bg-white font-medium text-[#718EBF] z-10">
       <tr>
         <th scope="col" class="px-6 py-4" v-for="column in columns">

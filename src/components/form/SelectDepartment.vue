@@ -7,14 +7,15 @@ const props = defineProps({
   placeholder: String,
   data: Array,
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["code", "name"]);
 const select = ref(props.placeholder);
 
 function handleOption(item) {
   if (typeof item === "object" && item !== null) {
     select.value = item.name;
     isActive.value = false;
-    emit("update:modelValue", item.code);
+    emit("code", item.code);
+    emit("name", item.name)
   } else {
     console.error("Xato", item);
   }
@@ -28,7 +29,7 @@ function handleOption(item) {
     </label>
     <div>
       <button type="button" @click="isActive = !isActive"
-        class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-6 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
+        class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
         aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
         <span class="flex w-full items-center justify-between">
           <span class="block truncate text-base text-[#8BA3CB]">{{
@@ -39,13 +40,23 @@ function handleOption(item) {
         </span>
       </button>
       <ul v-show="isActive"
-        class="absolute z-20 mt-1 h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+        class="absolute z-20 mt-1 h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
         tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
+
+        <li
+          class="group relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+          id="listbox-option-0" role="option" @click="handleOption({ code: '', name: 'Барча кафедралар' })">
+          <div class="flex cursor-pointer items-center">
+            <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">
+              Барча кафедралар
+            </span>
+          </div>
+        </li>
         <li
           class="group relative cursor-default select-none py-1 pl-3 pr-9 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
           id="listbox-option-0" role="option" v-for="item in data" @click="handleOption(item)">
           <div class="flex cursor-pointer items-center">
-            <span class="group-hover:text-main ml-3 block truncate font-normal text-[#8BA3CB] transition ease-linear">{{
+            <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">{{
               item.name }}</span>
           </div>
         </li>

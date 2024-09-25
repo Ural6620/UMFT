@@ -35,7 +35,8 @@ function handleMain(item) {
         @click="handleMain(item)">
         <td class="py-2 pl-6">{{ (props.page - 1) * limit + index + 1 }}</td>
         <td class="py-2 pl-6">
-          <img class="h-12 w-12 rounded-xl" :src="`${api.defaults.baseURL}/${item.img}`" alt="category image" />
+          <img class="h-12 w-12 rounded-xl object-fill" :src="`${api.defaults.baseURL}/${item.img}`"
+            alt="category image" />
         </td>
         <td class="px-6 py-2 truncate">{{ item.title }}</td>
         <td class="px-6 py-2">{{ item.products }}</td>

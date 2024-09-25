@@ -1,4 +1,6 @@
 <script setup>
+import BaseButton from './BaseButton.vue';
+
 const props = defineProps({
   show: Boolean,
 });
@@ -18,12 +20,9 @@ const props = defineProps({
           <slot name="body"></slot>
         </div>
 
-        <div class="w-full flex items-end gap-2 pt-4">
+        <div class="w-full flex items-end justify-end gap-4 pt-4">
           <slot name="footer"></slot>
-          <button class="w-32 bg-red-100 text-red-600 hover:bg-red-300 transition-all ease-linear rounded-md py-1"
-            @click="$emit('close')">
-            Чиқиш
-          </button>
+          <BaseButton class="w-52 lg:36" @click="$emit('close')">Бекор қилиш</BaseButton>
         </div>
       </div>
     </div>

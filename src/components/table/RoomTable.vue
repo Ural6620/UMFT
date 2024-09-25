@@ -32,17 +32,17 @@ function handleMain(item) {
     <tbody>
       <tr class="cursor-pointer border-t bg-white  hover:bg-[#f5f5f5]" v-for="(item, index) in data"
         @click="handleMain(item)">
-        <td class="pl-6">{{ (props.page - 1) * limit + index + 1 }}</td>
-        <td class="px-6 py-1 truncate">{{ item.title }}</td>
-        <td class="px-6 py-1">{{ item.number }}</td>
-        <td class="px-6 py-1 truncate">{{ item.filial?.title }}</td>
-        <td class="px-6 py-1 truncate">
+        <td class="pl-6 py-2">{{ (props.page - 1) * limit + index + 1 }}</td>
+        <td class="px-6 py-2 truncate">{{ item.title }}</td>
+        <td class="px-6 py-2">{{ item.number }}</td>
+        <td class="px-6 py-2 truncate">{{ item.filial?.title }}</td>
+        <td class="px-6 py-2 truncate">
           {{ item.type === 1 ? "Ўқув хонаси" : "Маиший хона" }}
         </td>
-        <td class="px-6 py-1 truncate">
+        <td class="px-6 py-2 truncate">
           {{ item.status === 1 ? "Фаол" : "Фаол эмас" }}
         </td>
-        <td class="flex items-center justify-end gap-4 px-4 py-1">
+        <td class="flex items-center justify-end gap-4 px-4 py-2">
           <BaseButton @click.stop="handleEdite(item)" color="blue">
             <PencilSquareIcon class="w-3.5 h-3.5" />
           </BaseButton>

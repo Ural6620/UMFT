@@ -12,7 +12,7 @@ function goPage(n) {
 }
 </script>
 <template>
-  <div class="text-main flex w-full items-center justify-end gap-2 px-10 py-2">
+  <div class="text-main flex w-full items-center justify-end gap-2 py-2">
     <span class="flex cursor-pointer items-center" @click="$emit('prew')">
       <ChevronLeftIcon class="h-4 w-4" />
     </span>

@@ -29,7 +29,7 @@ function handleMain(item) {
   <table class="relative w-full text-left">
     <thead class="sticky top-0 bg-white font-medium text-[#718EBF] z-10">
       <tr>
-        <th scope="col" class="px-6 py-3" v-for="column in columns">
+        <th scope="col" class="px-6 py-3 truncate" v-for="column in columns">
           {{ column.name }}
         </th>
       </tr>
@@ -39,7 +39,8 @@ function handleMain(item) {
         @click="handleMain(item)">
         <td class="py-2 pl-6">{{ (page - 1) * limit + (index + 1) }}</td>
         <td class="py-2 pl-6">
-          <img class="h-12 w-12 rounded-xl" :src="`${api.defaults.baseURL}/${item.img}`" alt="category image" />
+          <img class="h-12 w-12 rounded-xl object-fill" :src="`${api.defaults.baseURL}/${item.img}`"
+            alt="category image" />
         </td>
         <td class="px-6 py-2 truncate">{{ item.title }}</td>
         <td class="px-6 py-2 truncate">{{ item.categoryinventor?.title }}</td>

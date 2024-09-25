@@ -6,7 +6,7 @@ import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
 import { QrcodeStream } from 'vue-qrcode-reader'
 import api from "@/plugins/axios";
@@ -36,13 +36,15 @@ const empoyeeId = ref("");
 const pageNum = ref(1);
 const limit = 30;
 const titleEmployee = ref("");
-const codeDepartment = ref("");
+const codeDepartment = reactive({
+  name: "Кафедрани танланг",
+  code: ""
+});
 const qrCode = ref("");
 const urlQrCode = ref("");
-const placeholder = ref("Кафедрани танланг");
-const errorEl = ref('')
-const isCameraActive = ref(false)
-const selectedConstraints = ref({ facingMode: 'environment' })
+const errorEl = ref('');
+const isCameraActive = ref(false);
+const selectedConstraints = ref({ facingMode: 'environment' });
 const currentIndex = ref(null);
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
@@ -58,22 +60,26 @@ const form = reactive({
   ],
 });
 
-function addInvoice() {
-  form.inventories.push({
-    room: "",
-    product: "",
-    _id: "",
-  });
+
+function addInvoice(index) {
+  if (form.inventories[index]?._id) {
+    form.inventories.push({
+      room: "",
+      product: "",
+      _id: "",
+    });
+  }
 }
 
-function removeInvoice(index) {
-  form.inventories.splice(index, 1);
+function removeInvoice(item, length) {
+  if (length > 1) {
+    form.inventories.splice(item, 1);
+  }
 }
 
 async function openModal(id) {
   await roomStore.get(0);
   await productStore.get(0);
-
   form.employee = id;
   showModal.value = true;
 }
@@ -108,7 +114,7 @@ async function goPage(n, item) {
   if (item === "info") {
     pageInfo.value = n;
     await qrCodeStore.getAll(
-      12,
+      limit,
       pageInfo.value,
       "",
       "",
@@ -120,13 +126,13 @@ async function goPage(n, item) {
     pageNum.value = n;
     router.push({
       name: "employee",
-      query: { page: pageNum.value, employee: titleEmployee.value },
+      query: { page: pageNum.value, employee: titleEmployee.value, code: codeDepartment.code },
     });
     await employeeStore.get(
       limit,
       pageNum.value,
       titleEmployee.value,
-      codeDepartment.value,
+      codeDepartment.code,
     );
   }
 }
@@ -137,7 +143,7 @@ async function prewPage(item) {
       pageInfo.value--;
     }
     await qrCodeStore.getAll(
-      12,
+      limit,
       pageInfo.value,
       "",
       "",
@@ -155,11 +161,11 @@ async function prewPage(item) {
 
 async function nextPage(item) {
   if (item === "info") {
-    if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
+    if (pageInfo.value < Math.ceil(qrCodeStore.count / limit)) {
       pageInfo.value++;
     }
     await qrCodeStore.getAll(
-      12,
+      limit,
       pageInfo.value,
       "",
       "",
@@ -178,30 +184,16 @@ async function nextPage(item) {
 
 async function filter() {
   pageNum.value = 1;
+  console.log(codeDepartment)
   router.push({
     name: "employee",
-    query: { page: pageNum.value, employee: titleEmployee.value },
+    query: { page: pageNum.value, code: codeDepartment.code, employee: titleEmployee.value },
   });
   await employeeStore.get(
     limit,
     pageNum.value,
     titleEmployee.value,
-    codeDepartment.value,
-  );
-  isMobile.value = false;
-}
-
-async function filterDepartment() {
-  pageNum.value = 1;
-  router.push({
-    name: "employee",
-    query: { page: pageNum.value, code: codeDepartment.value },
-  });
-  await employeeStore.get(
-    limit,
-    pageNum.value,
-    titleEmployee.value,
-    codeDepartment.value,
+    codeDepartment.code,
   );
   isMobile.value = false;
 }
@@ -210,7 +202,7 @@ async function openInfo(id) {
   isInfo.value = true;
   empoyeeId.value = id;
   // await employeeStore.getEmployeeById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, "", "", "", "", empoyeeId.value);
+  await qrCodeStore.getAll(limit, pageInfo.value, "", "", "", "", empoyeeId.value);
 }
 async function downloadFile(item) {
   try {
@@ -262,14 +254,14 @@ function closeInfo() {
 
 function clear() {
   titleEmployee.value = "";
-  codeDepartment.value = "";
-  placeholder.value = "Кафедрани танланг";
+  codeDepartment.code = "";
+  codeDepartment.name = "Кафедрани танланг";
   pageNum.value = 1;
   router.push({
     name: "employee",
     query: { page: pageNum.value, employee: titleEmployee.value },
   });
-  employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.value);
+  employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.code);
 }
 
 function openCamera(index) {
@@ -343,12 +335,12 @@ onMounted(async () => {
     const queryCode = route.query.code;
     pageNum.value = queryPage;
     titleEmployee.value = queryTitle;
-    codeDepartment.value = queryCode;
+    codeDepartment.code = queryCode;
     await employeeStore.get(
       limit,
       pageNum.value,
       titleEmployee.value,
-      codeDepartment.value,
+      codeDepartment.code,
     );
     await employeeStore.getDepartment();
   } else {
@@ -366,29 +358,29 @@ onUnmounted(() => {
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
     <div class="flex items-center gap-4">
       <!-- Filter Department -->
-      <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" v-model="codeDepartment"
-        @update:model-value="filterDepartment" class="w-64" />
+      <SelectDepartment :placeholder="codeDepartment.name" :data="employeeStore.departments" @code="codeDepartment.code"
+        @name="codeDepartment.name" class="w-64" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-640 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
+        class="text-main focus:border-main w-64 rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
       <!-- /Filter title -->
 
-      <BaseButton @click="filter" color="yellow">
+      <BaseButton @click="filter" color="blue">
         <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="clear" color="red">
+      <BaseButton @click="clear" color="orange">
         <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click.prevent="synchronAll()" color="blue">
+      <BaseButton @click.prevent="synchronAll()" color="green">
         <ArrowPathIcon class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>
 
-  <div v-else class="flex justify-between  items-center relative pt-16">
+  <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
     <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
@@ -396,23 +388,23 @@ onUnmounted(() => {
     <div v-if="isMobile"
       class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
       <!-- Filter Department -->
-      <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" v-model="codeDepartment"
-        @update:model-value="filterDepartment" class="w-full" />
+      <SelectDepartment :placeholder="placeholder" :data="employeeStore.departments" @code="codeDepartment.code"
+        @name="codeDepartment.name" class="w-full" />
       <!-- /Filter Department -->
 
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-full rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
+        class="text-main focus:border-main w-full rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
         placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
       <!-- /Filter title -->
 
-      <BaseButton @click="filter" color="yellow" class="w-1/2">
+      <BaseButton @click="filter" color="blue" class="w-1/2">
         <MagnifyingGlassIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="clear" color="red" class="w-1/2">
+      <BaseButton @click="clear" color="orange" class="w-1/2">
         <XMarkIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click.prevent="synchronAll()" color="blue" class="w-1/2">
+      <BaseButton @click.prevent="synchronAll()" color="green" class="w-1/2">
         <ArrowPathIcon class="h-5 w-5" />
       </BaseButton>
     </div>
@@ -420,7 +412,7 @@ onUnmounted(() => {
   <!-- /Header Product -->
 
   <!-- Table -->
-  <div class="overflow-auto rounded-2xl bg-white">
+  <div class="overflow-auto rounded-2xl bg-white flex-1">
     <EmployeeTable :columns="colEmployee" :data="employeeStore.employees" :page="pageNum" :limit="limit"
       @edite="openModal" @main="openInfo" />
   </div>
@@ -440,11 +432,15 @@ onUnmounted(() => {
           <div class="flex flex-col gap-4 items-end">
             <div v-for="(item, index) in form.inventories" class="flex w-full  items-baseline gap-4">
               <div class=" flex gap-4 items-baseline">
-                <BaseButton @click.prevent="openCamera(index)" color="blue">
+                <BaseButton @click.prevent="openCamera(index)" color="green">
                   <EyeIcon class="relative h-5 w-5" />
                 </BaseButton>
-                <BaseButton @click.prevent="removeInvoice(item)" color="red">
+                <BaseButton @click.prevent="removeInvoice(item, form.inventories.length)" color="red">
                   <TrashIcon class="relative h-5 w-5 text-red-600" />
+                </BaseButton>
+                <BaseButton v-if="index === form.inventories.length - 1" @click.prevent="addInvoice(index)"
+                  color="blue">
+                  <PlusIcon class="relative h-5 w-5" />
                 </BaseButton>
                 <p class="text-xl">{{ item.product }}</p>
               </div>
@@ -452,19 +448,12 @@ onUnmounted(() => {
             <div class="w-full">
               <p v-if="errorEl" class="text-red-600">{{ errorEl }}</p>
             </div>
-            <button @click.prevent="addInvoice()"
-              class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
-              <span class="relative text-2xl text-blue-600"> + </span>
-            </button>
           </div>
         </BaseForm>
       </template>
       <!-- /Edite Modal -->
       <template #button>
-        <button @click="submitForm"
-          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
-          Сақлаш
-        </button>
+        <BaseButton class="w-32" @click="submitForm" color="green">Сақлаш</BaseButton>
       </template>
     </InvoiceModal>
     <!-- /Invoice Modal -->
@@ -477,14 +466,14 @@ onUnmounted(() => {
           Бу ходима маҳсулот бириктирилмаган!
         </div>
         <div v-else class=" overflow-auto rounded-2xl bg-white py-2">
-          <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+          <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limit"
             :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
         </div>
       </template>
       <template #footer>
         <!-- Pagination -->
-        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
-          @goPage="goPage($event, 'info')" />
+        <Pagination :page="pageInfo" :limit="limit" :data="qrCodeStore" @next="nextPage('info')"
+          @prew="prewPage('info')" @goPage="goPage($event, 'info')" />
         <!-- /Pagination-->
       </template>
     </InfoRoomModal>

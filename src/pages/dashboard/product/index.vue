@@ -35,7 +35,8 @@ const productId = ref("");
 const titleProduct = ref("");
 const qrCode = ref("");
 const urlQrCode = ref("");
-const limit = 8;
+const limit = 14;
+const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
 
@@ -114,7 +115,7 @@ function closeModal() {
 async function goPage(n, item) {
   if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, productId.value, "");
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, productId.value, "");
   } else {
     pageNum.value = n;
     router.push({
@@ -130,7 +131,7 @@ async function prewPage(item) {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, productId.value, "");
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, productId.value, "");
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -141,10 +142,10 @@ async function prewPage(item) {
 
 async function nextPage(item) {
   if (item === "info") {
-    if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
+    if (pageInfo.value < Math.ceil(qrCodeStore.count / limitQrCode)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, productId.value, "");
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, productId.value, "");
   } else {
     const maxPage = Math.ceil(productStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -178,7 +179,7 @@ async function openInfo(id) {
   isInfo.value = true;
   productId.value = id;
   await productStore.getProductById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, productId.value, "");
+  await qrCodeStore.getAll(limitQrCode, pageInfo.value, productId.value, "");
 }
 async function downloadFile(item) {
   try {
@@ -258,39 +259,39 @@ onUnmounted(() => {
     <div class="flex items-center gap-4">
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-40 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        class="text-main focus:border-main w-56 rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Маҳсулот номи" v-model="titleProduct" />
       <!-- /Filter title -->
-      <BaseButton @click="filter" color="yellow">
+      <BaseButton @click="filter" color="blue">
         <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="clear" color="red">
+      <BaseButton @click="clear" color="orange">
         <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="blue">
+      <BaseButton @click="showModal = true" color="green">
         <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>
-  <div v-else class="flex justify-between  items-center relative pt-16">
+  <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Маҳсулот</h3>
     <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
     </BaseButton>
     <div v-if="isMobile"
-      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-20 w-screen h-screen">
       <!-- Filter title -->
       <input type="text"
-        class="text-main focus:border-main w-1/2 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        class="text-main focus:border-main w-1/2 rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Маҳсулот номи" v-model="titleProduct" />
 
-      <BaseButton @click="filter" color="yellow" class="w-1/2">
+      <BaseButton @click="filter" color="blue" class="w-1/2">
         <MagnifyingGlassIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="clear" color="red" class="w-1/2">
+      <BaseButton @click="clear" color="orange" class="w-1/2">
         <XMarkIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="openModal" color="blue" class="w-1/2">
+      <BaseButton @click="openModal" color="green" class="w-1/2">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
@@ -326,10 +327,7 @@ onUnmounted(() => {
         </BaseForm>
       </template>
       <template #button>
-        <button @click="submitForm"
-          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
-          Сақлаш
-        </button>
+        <BaseButton class="w-32" @click="submitForm" color="green">Сақлаш</BaseButton>
       </template>
     </BaseModal>
     <!-- /Add and Edite Modal -->
@@ -352,15 +350,15 @@ onUnmounted(() => {
     <InfoRoomModal :show="isInfo" @close="closeInfo">
       <template #header>Маҳсулот: {{ productStore.productById?.title }}</template>
       <template #body>
-        <div class="overflow-auto rounded-2xl bg-white py-2 lg:h-[660px]">
-          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+        <div class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
+          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
             @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
         </div>
       </template>
       <template #footer>
         <!-- Pagination -->
-        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
-          @goPage="goPage($event, 'info')" />
+        <Pagination :page="pageInfo" :limit="limitQrCode" :data="qrCodeStore" @next="nextPage('info')"
+          @prew="prewPage('info')" @goPage="goPage($event, 'info')" />
         <!-- /Pagination-->
       </template>
     </InfoRoomModal>

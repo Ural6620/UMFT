@@ -53,7 +53,7 @@ function handleMain(item) {
         <td class="px-6 py-2">{{ item.file?.length }}</td>
         <td class="px-4 py-2">
           <div class="flex items-center justify-end gap-4">
-            <BaseButton @click.stop="handleDownload(item)" color="yellow">
+            <BaseButton v-if="item?.file?.length > 0" @click.stop="handleDownload(item)" color="yellow">
               <ArrowDownOnSquareStackIcon class="relative h-3.5 w-3.5" />
             </BaseButton>
             <BaseButton @click.stop="handleEdite(item)" color="blue">

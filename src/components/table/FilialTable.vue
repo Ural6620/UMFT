@@ -42,7 +42,8 @@ function handleMain(item) {
           {{ (props.page - 1) * props.limit + index + 1 }}
         </td>
         <td class="p-2 lg:px-6">
-          <img class="h-12 w-12 rounded-xl" :src="`${api.defaults.baseURL}/${item.img}`" alt="filial image" />
+          <img class="h-12 w-12 rounded-xl object-fill" :src="`${api.defaults.baseURL}/${item.img}`"
+            alt="filial image" />
         </td>
         <td class="p-2 lg:px-6">{{ item.title }}</td>
         <td class="p-2 lg:px-6">{{ item.number }}</td>

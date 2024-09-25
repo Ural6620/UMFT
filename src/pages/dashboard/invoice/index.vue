@@ -36,7 +36,8 @@ const showQr = ref(false);
 const isInfo = ref(false);
 const pageInfo = ref(1);
 const invoiceId = ref("");
-const limit = 8;
+const limit = 14;
+const limitQrCode = 14;
 const pageNum = ref(1);
 const titleInvoice = ref("");
 const qrCode = ref("");
@@ -168,15 +169,25 @@ function closeModal() {
   resetForm();
 }
 
-function addInvoice(item) {
-  if (item === "form") {
+function addInvoice(invoice) {
+  let index = form.invoicepack.findIndex(
+    (item) => item.product === invoice.product,
+  );
+  if (form.invoicepack[index]?.product && form.invoicepack[index]?.count && form.invoicepack[index]?.per_price) {
     form.invoicepack.push({
       product: "",
       count: 0,
       per_price: 0,
       total_price: 0,
     });
-  } else {
+  }
+}
+
+function editeInvoice(invoice) {
+  let index = formEdite.value.findIndex(
+    (item) => item.product === invoice.product,
+  );
+  if (formEdite.value[index]?.product && formEdite.value[index]?.room && formEdite.value[index]?.count) {
     formEdite.value.push({
       product: "",
       room: "",
@@ -185,20 +196,20 @@ function addInvoice(item) {
   }
 }
 
-function deleteInvoice(invoice) {
+function deleteInvoice(invoice, length) {
   let index = form.invoicepack.findIndex(
     (item) => item.product === invoice.product,
   );
-  if (index !== -1) {
+  if (index !== -1 && length > 1) {
     form.invoicepack.splice(index, 1);
   }
 }
 
-function deleteInvoiceEdite(invoice) {
+function deleteInvoiceEdite(invoice, length) {
   let index = formEdite.value.findIndex(
     (item) => item.product === invoice.product,
   );
-  if (index !== -1) {
+  if (index !== -1 && length > 1) {
     formEdite.value.splice(index, 1);
   }
 }
@@ -208,7 +219,7 @@ function deleteFile(index) {
 }
 
 function invoiceSum(invoice) {
-  const sum = invoice.count * invoice.per_price;
+  const sum = invoice?.count * invoice?.per_price;
   invoice.total_price = sum;
   return sum;
 }
@@ -216,7 +227,7 @@ function invoiceSum(invoice) {
 async function goPage(n, item) {
   if (item === "info") {
     pageInfo.value = n;
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", "", invoiceId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
   } else {
     pageNum.value = n;
     router.push({
@@ -232,7 +243,7 @@ async function prewPage(item) {
     if (pageInfo.value > 1) {
       pageInfo.value--;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", "", invoiceId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
   } else {
     if (pageNum.value > 1) {
       pageNum.value--;
@@ -243,10 +254,10 @@ async function prewPage(item) {
 
 async function nextPage(item) {
   if (item === "info") {
-    if (pageInfo.value < Math.ceil(qrCodeStore.count / 12)) {
+    if (pageInfo.value < Math.ceil(qrCodeStore.count / limitQrCode)) {
       pageInfo.value++;
     }
-    await qrCodeStore.getAll(12, pageInfo.value, "", "", "", invoiceId.value);
+    await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
   } else {
     const maxPage = Math.ceil(invoiceStore.count / limit);
     if (pageNum.value < maxPage) {
@@ -280,7 +291,7 @@ async function openInfo(id) {
   isInfo.value = true;
   invoiceId.value = id;
   await invoiceStore.getInvoiceById(id);
-  await qrCodeStore.getAll(12, pageInfo.value, "", "", "", invoiceId.value);
+  await qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
 }
 async function downloadFile(item) {
   try {
@@ -366,23 +377,23 @@ onUnmounted(() => {
     <div class="flex items-center gap-4">
       <!-- Filter title -->
       <input type="number"
-        class="text-main focus:border-main w-44 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+        class="text-main focus:border-main w-56 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Фактура рақами" v-model="titleInvoice" />
       <!-- /Filter title -->
 
-      <BaseButton @click="filter" color="yellow">
+      <BaseButton @click="filter" color="blue">
         <MagnifyingGlassIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="clear" color="red">
+      <BaseButton @click="clear" color="orange">
         <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="openModal" color="blue">
+      <BaseButton @click="openModal" color="green">
         <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>
 
-  <div v-else class="flex justify-between  items-center relative pt-16">
+  <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
     <BaseButton @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
@@ -394,13 +405,13 @@ onUnmounted(() => {
         class="text-main focus:border-main w-1/2 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
         placeholder="Фактура рақами" v-model="titleInvoice" />
 
-      <BaseButton @click="filter" color="yellow" class="w-1/2">
+      <BaseButton @click="filter" color="blue" class="w-1/2">
         <MagnifyingGlassIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="clear" color="red" class="w-1/2">
+      <BaseButton @click="clear" color="orange" class="w-1/2">
         <XMarkIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="openModal" color="blue" class="w-1/2">
+      <BaseButton @click="openModal" color="green" class="w-1/2">
         <PlusIcon class="h-5 w-5" />
       </BaseButton>
     </div>
@@ -429,28 +440,27 @@ onUnmounted(() => {
       <template v-if="form._id" #body>
         <BaseForm @submit.prevent="submitForm">
           <div class="col-span-4 flex max-h-96 flex-col items-end">
-            <div class="grid w-full grid-cols-10 gap-4 font-semibold text-[#718EBF]">
+            <div class="grid w-full grid-cols-11 lg:grid-cols-10 gap-4 font-semibold text-[#718EBF]">
               <h4 class="col-span-3">Маҳсулот</h4>
               <h4 class="col-span-3">Хона</h4>
               <h4 class="col-span-3">Сони</h4>
             </div>
-            <div v-for="item in formEdite" class="grid w-full grid-cols-10 gap-4 items-baseline">
+            <div v-for="(item, index) in formEdite"
+              class="grid w-full grid-cols-11 lg:grid-cols-10 gap-4 justify-center items-baseline">
               <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" class="col-span-3"
                 v-model="item.product" />
               <SelectFilial placeholder="Хонани танланг" :data="roomStore.rooms" class="col-span-3"
                 v-model="item.room" />
               <BaseInput placeholder="Сони" inputType="number" class="col-span-3" v-model="item.count" />
-              <div class="col-span-1 mb-2 flex items-center">
-                <button @click.prevent="deleteInvoiceEdite(item)"
-                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
-                  <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-                </button>
+              <div class="col-span-1 mb-2 flex items-center gap-1 lg:gap-4">
+                <BaseButton @click.prevent="deleteInvoiceEdite(item, formEdite.length)" color="red">
+                  <TrashIcon class="relative h-4 w-4" />
+                </BaseButton>
+                <BaseButton v-if="index === formEdite.length - 1" @click.prevent="editeInvoice(item)" color="blue">
+                  <PlusIcon class="relative h-4 w-4" />
+                </BaseButton>
               </div>
             </div>
-            <button @click.prevent="addInvoice('formEdite')"
-              class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
-              <span class="relative text-2xl text-blue-600">+</span>
-            </button>
           </div>
         </BaseForm>
       </template>
@@ -471,10 +481,9 @@ onUnmounted(() => {
           <ol v-if="form.file.length > 0" class="col-span-4 flex flex-col gap-1 rounded border p-2">
             <li class="col-span-4 flex items-center gap-4 pl-2" v-for="item in form.file">
               <p class="text-[#718EBF]">{{ item }}</p>
-              <button @click.prevent="deleteFile(item)"
-                class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
-                <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-              </button>
+              <BaseButton @click.prevent="deleteFile(item)" color="red">
+                <TrashIcon class="relative h-3.5 w-3.5" />
+              </BaseButton>
             </li>
           </ol>
           <h6 class="col-span-4 mb-4 text-xl font-semibold text-[#718EBF]">
@@ -487,46 +496,39 @@ onUnmounted(() => {
               <h4 class="col-span-2">Нарҳи</h4>
               <h4 class="col-span-2">Жами</h4>
             </div>
-            <div v-for="invoice in form.invoicepack" :data="invoice"
-              class="grid w-full grid-cols-9 items-baseline gap-4">
-              <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" v-model="invoice.product"
-                class="col-span-2" classes="w-full" />
-              <BaseInput placeholder="Сони" inputType="number" v-model="invoice.count" class="col-span-2" />
-              <BaseInput placeholder="Нарҳи" inputType="number" v-model="invoice.per_price" class="col-span-2" />
+            <div v-for="(item, index) in form.invoicepack" class="grid w-full grid-cols-9 items-baseline gap-4">
+              <SelectFilial placeholder="Маҳсулотни танланг" :data="productStore.products" v-model="item.product"
+                class="col-span-3 lg:col-span-2 " classes="w-full" />
+              <BaseInput placeholder="Сони" inputType="number" v-model="item.count" class="col-span-1 lg:col-span-2" />
+              <BaseInput placeholder="Нарҳи" inputType="number" v-model="item.per_price" class="col-span-2" />
               <span
                 class="text-main col-span-2 mb-2 flex w-full items-center rounded-md border border-[#8BA3CB] px-2 py-1.5">
-                {{ invoiceSum(invoice) }}
+                {{ invoiceSum(item) }}
               </span>
-              <div class="col-span-1 mb-2 flex items-center">
-                <button @click.prevent="deleteInvoice(invoice)"
-                  class="inline-flex items-center justify-center gap-1 rounded bg-red-100 p-2 transition ease-linear hover:bg-red-300">
-                  <TrashIcon class="relative h-3.5 w-3.5 text-red-600" />
-                </button>
+              <div class="col-span-1 mb-2 flex items-center gap-4">
+                <BaseButton @click.prevent="deleteInvoice(item, form.invoicepack.length)" color="red">
+                  <TrashIcon class="relative h-4 w-4" />
+                </BaseButton>
+                <BaseButton v-if="index === form.invoicepack.length - 1" @click.prevent="addInvoice(item)" color="blue">
+                  <PlusIcon class="relative h-4 w-4" />
+                </BaseButton>
               </div>
             </div>
-            <button @click.prevent="addInvoice('form')"
-              class="flex w-20 items-center justify-center rounded bg-blue-100 pb-1 transition ease-linear hover:bg-blue-300">
-              <span class="relative text-2xl text-blue-600"> +</span>
-            </button>
           </div>
         </BaseForm>
       </template>
       <!-- /Add Modal -->
       <template #button>
-        <button @click="submitForm"
-          class="w-32 rounded-md bg-blue-100 py-1 text-blue-600 transition-all ease-linear hover:bg-blue-300">
+        <BaseButton class="w-32" color="green" @click="submitForm">
           Сақлаш
-        </button>
+        </BaseButton>
       </template>
     </InvoiceModal>
     <!-- /Invoice Modal -->
 
     <!-- File Modal -->
     <FileModal :show="isFile" @close="closeInvoiceFileModal">
-      <p v-if="form.file.length === 0" class="text-[#718EBF]">
-        Файл бириктирилмаган
-      </p>
-      <ul v-else>
+      <ul>
         <li class="flex items-center gap-4" v-for="item in form.file" :data="item">
           <p class="text-[#718EBF]">{{ item }}</p>
           <button @click.prevent="downloadInvoiceFile(item)"
@@ -556,19 +558,15 @@ onUnmounted(() => {
     <InfoRoomModal :show="isInfo" @close="closeInfo">
       <template #header>Счёт фактура: {{ invoiceStore.invoiceById?.title }}</template>
       <template #body>
-        <div v-if="!qrCodeStore.qrCodes.length"
-          class="text-main overflow-auto rounded-2xl bg-white py-2 text-center lg:h-[660px]">
-          Бу хонага маҳсулот бириктирилмаган
-        </div>
-        <div v-else class="overflow-auto rounded-2xl bg-white py-2 lg:h-[640px]">
-          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="12"
+        <div class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
+          <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
             @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
         </div>
       </template>
       <template #footer>
         <!-- Pagination -->
-        <Pagination :page="pageInfo" :limit="12" :data="qrCodeStore" @next="nextPage('info')" @prew="prewPage('info')"
-          @goPage="goPage($event, 'info')" />
+        <Pagination :page="pageInfo" :limit="limitQrCode" :data="qrCodeStore" @next="nextPage('info')"
+          @prew="prewPage('info')" @goPage="goPage($event, 'info')" />
         <!-- /Pagination-->
       </template>
     </InfoRoomModal>
