@@ -254,8 +254,8 @@ onUnmounted(() => {
       </BaseButton>
     </div>
     <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
-      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
-        <ArrowUturnLeftIcon class="h-5 w-5" />
+      <BaseButton @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <XMarkIcon class="h-5 w-5" />
       </BaseButton>
       <!-- Filter title -->
       <div class="flex flex-col gap-4 w-full mt-10">
@@ -268,13 +268,13 @@ onUnmounted(() => {
         <!-- /Filter Room -->
         <div class="flex gap-4">
           <BaseButton @click="filter" color="blue" class="w-1/2">
-            <MagnifyingGlassIcon class="h-6 w-6" />
+            <MagnifyingGlassIcon class="h-5 w-5" />
           </BaseButton>
           <BaseButton @click="clear" color="orange" class="w-1/2">
-            <XMarkIcon class="h-6 w-6" />
+            <XMarkIcon class="h-5 w-5" />
           </BaseButton>
           <BaseButton @click="openDownload" color="green" class="w-1/2">
-            <ArrowDownOnSquareStackIcon class="h-6 w-6" />
+            <ArrowDownOnSquareStackIcon class="h-5 w-5" />
           </BaseButton>
         </div>
       </div>

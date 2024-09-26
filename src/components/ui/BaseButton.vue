@@ -21,7 +21,7 @@ const colorClasses = computed(() => {
     case 'main':
       return 'text-main';
     default:
-      return 'text-gray-600 bg-gray-100 hover:bg-gray-300'; // Default rang
+      return 'text-main bg-gray-100 hover:bg-gray-300'; // Default rang
   }
 });
 </script>

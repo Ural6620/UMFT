@@ -353,6 +353,8 @@ function closeInfo() {
 }
 
 function openModal() {
+  productStore.get(0);
+  roomStore.get(0);
   isMobile.value = false;
   showModal.value = true;
 }
@@ -408,8 +410,8 @@ onUnmounted(() => {
       <Bars3Icon class="h-6 w-6" />
     </BaseButton>
     <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
-      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
-        <ArrowUturnLeftIcon class="h-5 w-5" />
+      <BaseButton @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <XMarkIcon class="h-5 w-5" />
       </BaseButton>
       <!-- Filter title -->
       <div class="flex flex-col gap-4 w-full mt-10">
@@ -419,13 +421,13 @@ onUnmounted(() => {
 
         <div class="flex gap-4">
           <BaseButton @click="filter" color="blue" class="w-1/2">
-            <MagnifyingGlassIcon class="h-6 w-6" />
+            <MagnifyingGlassIcon class="h-5 w-5" />
           </BaseButton>
           <BaseButton @click="clear" color="orange" class="w-1/2">
-            <XMarkIcon class="h-6 w-6" />
+            <XMarkIcon class="h-5 w-5" />
           </BaseButton>
           <BaseButton @click="openModal" color="green" class="w-1/2">
-            <PlusIcon class="h-6 w-6" />
+            <PlusIcon class="h-5 w-5" />
           </BaseButton>
         </div>
       </div>
@@ -472,7 +474,8 @@ onUnmounted(() => {
                 <BaseButton @click.prevent="deleteInvoiceEdite(index, formEdite.length)" color="red">
                   <TrashIcon class="relative h-4 w-4" />
                 </BaseButton>
-                <BaseButton v-if="index === formEdite.length - 1" @click.prevent="editeInvoice(index)" color="blue">
+                <BaseButton v-if="index === formEdite.length - 1 && formEdite[index]?.count"
+                  @click.prevent="editeInvoice(index)" color="blue">
                   <PlusIcon class="relative h-4 w-4" />
                 </BaseButton>
               </div>
@@ -488,7 +491,6 @@ onUnmounted(() => {
           <div class="col-span-4 grid grid-cols-2 items-center gap-x-4">
             <BaseInput v-model="form.title" label="Фактура рақами" placeholder="Фактура рақами" inputType="number" />
             <BaseInput v-model="form.description" label="Тавсиф" placeholder="Тавсиф" inputType="string" />
-            <BaseInput v-model="form.model" label="Модел" placeholder="Модел" inputType="string" />
             <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" classes="py-1.5" />
           </div>
           <h6 v-if="form.file.length > 0" class="col-span-4 mb-2 text-xl font-semibold text-[#718EBF]">
@@ -507,8 +509,8 @@ onUnmounted(() => {
           </h6>
           <div class="col-span-4 flex max-h-96 flex-col items-end overflow-y-auto pb-20">
             <div class="grid w-full grid-cols-9 gap-4 font-semibold text-[#718EBF]">
-              <h4 class="col-span-2">Маҳсулот</h4>
-              <h4 class="col-span-2">Сони</h4>
+              <h4 class="col-span-3 lg:col-span-2">Маҳсулот</h4>
+              <h4 class="col-span-1 lg:col-span-2">Сони</h4>
               <h4 class="col-span-2">Нарҳи</h4>
               <h4 class="col-span-2">Жами</h4>
             </div>
@@ -525,8 +527,8 @@ onUnmounted(() => {
                 <BaseButton @click.prevent="deleteInvoice(index, form.invoicepack.length)" color="red">
                   <TrashIcon class="relative h-4 w-4" />
                 </BaseButton>
-                <BaseButton v-if="index === form.invoicepack.length - 1" @click.prevent="addInvoice(index)"
-                  color="blue">
+                <BaseButton v-if="index === form.invoicepack?.length - 1 && form.invoicepack[index]?.count"
+                  @click.prevent="addInvoice(index)" color="blue">
                   <PlusIcon class="relative h-4 w-4" />
                 </BaseButton>
               </div>

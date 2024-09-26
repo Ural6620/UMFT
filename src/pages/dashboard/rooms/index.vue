@@ -388,70 +388,79 @@ onUnmounted(() => {
 
   <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Хона</h3>
-    <BaseButton @click="isMobile = true">
+    <BaseButton color="main" @click="isMobile = true">
       <Bars3Icon class="h-5 w-5" />
     </BaseButton>
-    <div v-if="isMobile"
-      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
-      <!-- Filter title -->
-      <input type="text"
-        class="text-main focus:border-main w-full truncate rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-        placeholder="Хона номи" v-model="titleRoom" />
-      <!-- /Filter title -->
 
+    <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <BaseButton @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <XMarkIcon class="h-5 w-5" />
+      </BaseButton>
       <!-- Filter title -->
-      <input type="text"
-        class="text-main focus:border-main w-full truncate rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-        placeholder="Хона рақами" v-model="orderRoom" />
-      <!-- /Filter title --
+      <div class="flex flex-col gap-4 w-full mt-10">
+        <!-- Filter title -->
+        <input type="text"
+          class="text-main focus:border-main w-full truncate rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Хона номи" v-model="titleRoom" />
+        <!-- /Filter title -->
+
+        <!-- Filter title -->
+        <input type="text"
+          class="text-main focus:border-main w-full truncate rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Хона рақами" v-model="orderRoom" />
+        <!-- /Filter title --
 
         <!-- Filter filial -->
-      <div class="relative w-full transition-all duration-1000 z-10">
-        <button type="button" @click="isFilial = !isFilial"
-          class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
-          aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
-          <span class="flex items-center justify-between">
-            <span class="block truncate text-[#8BA3CB]">{{
-              filialSelect
-            }}</span>
-            <ChevronDownIcon class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
-              :class="isFilial ? 'rotate-180 transform' : ''" />
-          </span>
-        </button>
-        <ul v-show="isFilial"
-          class="absolute z-10 mt-1 py-2 max-h-56 w-full overflow-auto rounded-md bg-white text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-          tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
-          <li
-            class="relative cursor-default select-none py-1 pl-3 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
-            id="listbox-option-0" role="option" @click="filterFilial({ _id: '', title: 'Барча филиаллар' })">
-            <div class="group flex cursor-pointer items-center">
-              <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">
-                Барча филиаллар
-              </span>
-            </div>
-          </li>
-          <li
-            class="relative cursor-default select-none py-1 pl-3 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
-            id="listbox-option-0" role="option" v-for="item in filialStore.filials" @click="filterFilial(item)">
-            <div class="group flex cursor-pointer items-center">
-              <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">
-                {{ item.title }}
-              </span>
-            </div>
-          </li>
-        </ul>
+        <div class="relative w-full transition-all duration-1000 z-10">
+          <button type="button" @click="isFilial = !isFilial"
+            class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
+            aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+            <span class="flex items-center justify-between">
+              <span class="block truncate text-[#8BA3CB]">{{
+                filialSelect
+              }}</span>
+              <ChevronDownIcon class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
+                :class="isFilial ? 'rotate-180 transform' : ''" />
+            </span>
+          </button>
+          <ul v-show="isFilial"
+            class="absolute z-10 mt-1 py-2 max-h-56 w-full overflow-auto rounded-md bg-white text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+            tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
+            <li
+              class="relative cursor-default select-none py-1 pl-3 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+              id="listbox-option-0" role="option" @click="filterFilial({ _id: '', title: 'Барча филиаллар' })">
+              <div class="group flex cursor-pointer items-center">
+                <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">
+                  Барча филиаллар
+                </span>
+              </div>
+            </li>
+            <li
+              class="relative cursor-default select-none py-1 pl-3 text-gray-900 transition-all ease-linear hover:bg-[#F5F7FA]"
+              id="listbox-option-0" role="option" v-for="item in filialStore.filials" @click="filterFilial(item)">
+              <div class="group flex cursor-pointer items-center">
+                <span class="group-hover:text-main block truncate font-normal text-[#8BA3CB] transition ease-linear">
+                  {{ item.title }}
+                </span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <!-- /Filter filial -->
+        <div class="flex gap-4">
+          <BaseButton @click="filter" color="blue" class="w-1/2">
+            <MagnifyingGlassIcon class="h-5 w-5" />
+          </BaseButton>
+          <BaseButton @click="clear" color="orange" class="w-1/2">
+            <XMarkIcon class="h-5 w-5" />
+          </BaseButton>
+          <BaseButton @click="openModal" color="green" class="w-1/2">
+            <PlusIcon class="h-5 w-5" />
+          </BaseButton>
+        </div>
       </div>
-      <!-- /Filter filial -->
-      <BaseButton @click="filter" color="yellow" class="w-1/2">
-        <MagnifyingGlassIcon class="h-4 w-4" />
-      </BaseButton>
-      <BaseButton @click="clear" color="red" class="w-1/2">
-        <XMarkIcon class="h-4 w-4" />
-      </BaseButton>
-      <BaseButton @click="openModal" color="blue" class="w-1/2">
-        <PlusIcon class="h-4 w-4" />
-      </BaseButton>
     </div>
+
   </div>
   <!-- /Room Header section -->
 
