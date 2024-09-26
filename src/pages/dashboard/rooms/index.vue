@@ -42,6 +42,7 @@ const limit = 20;
 const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('')
 
 const form = reactive({
   title: "",
@@ -70,20 +71,32 @@ const handleEdite = async (id) => {
 };
 
 const submitForm = async () => {
-  if (!form._id) {
-    await roomStore.addRoom(form);
+  if (!form.title) {
+    alert.value = "Хона номини киритинг";
+  } else if (!form.number) {
+    alert.value = "Хона рақамини киритинг";
+  } else if (!form.filial) {
+    alert.value = "Филални танланг";
+  } else if (!form.type) {
+    alert.value = "Типни танланг";
+  } else if (!form.status) {
+    alert.value = "Статусни танланг";
   } else {
-    await roomStore.updateRoom(form);
+    if (!form._id) {
+      await roomStore.addRoom(form);
+    } else {
+      await roomStore.updateRoom(form);
+    }
+    await roomStore.get(
+      limit,
+      pageNum.value,
+      titleRoom.value,
+      filialId.value,
+      orderRoom.value,
+    );
+    showModal.value = false;
+    resetForm();
   }
-  await roomStore.get(
-    limit,
-    pageNum.value,
-    titleRoom.value,
-    filialId.value,
-    orderRoom.value,
-  );
-  showModal.value = false;
-  resetForm();
 };
 
 const resetForm = () => {
@@ -93,6 +106,7 @@ const resetForm = () => {
   form.filial = "";
   form.type = "";
   form.status = "";
+  alert.value = ''
 };
 
 function closeModal() {
@@ -451,7 +465,10 @@ onUnmounted(() => {
   <!-- Modal  -->
   <Teleport to="body">
     <BaseModal :show="showModal" @close="closeModal">
-      <template #header>Хона{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template>
+      <template #header>
+        <p>Хона{{ form._id ? "ни ўзгартириш" : " яратиш" }}</p>
+        <p class="text-red-500 text-base">{{ alert }}</p>
+      </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
           <BaseInput v-model="form.title" label="Хона номи" placeholder="Хона номи" inputType="string" />
@@ -465,6 +482,7 @@ onUnmounted(() => {
           <BaseSelect label="Статус" :placeholder="form.status || 'Хона статусини танланг'" :data="status"
             v-model="form.status" />
         </BaseForm>
+
       </template>
       <template #button>
         <BaseButton class="w-32" @click="submitForm" color="green">Сақлаш</BaseButton>

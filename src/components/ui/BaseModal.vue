@@ -12,7 +12,7 @@ const props = defineProps({
       class="fixed z-50 top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.5)] transition-all duration-300 ease-in flex">
       <div
         class="modal-container w-11/12 lg:w-1/2 m-auto px-5 py-8 bg-white rounded-2xl transition-all duration-300 ease-in shadow-[0_2px_8px_rgba(0,0,0,0.33)] divide-y">
-        <div class="modal-header text-xl pb-3 text-main">
+        <div class="modal-header text-xl pb-3 text-main flex justify-between">
           <slot name="header">default header</slot>
         </div>
 
@@ -21,7 +21,7 @@ const props = defineProps({
         </div>
 
         <div class="w-full flex justify-end gap-2 pt-4">
-          <BaseButton class="w-32"  @click="$emit('close')">
+          <BaseButton class="w-32" @click="$emit('close')">
             Бекор қилиш
           </BaseButton>
           <slot name="button" />

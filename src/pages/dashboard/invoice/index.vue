@@ -42,6 +42,7 @@ const qrCode = ref("");
 const urlQrCode = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('')
 
 const form = reactive({
   title: "",
@@ -126,13 +127,36 @@ async function downloadInvoiceFile(item) {
 
 async function submitForm() {
   if (!form._id) {
-    await invoiceStore.addInvoice(form);
+    if (!form.title) {
+      alert.value = "Фактура рақамини киритинг"
+    } else if (!form.description) {
+      alert.value = "Фактура маълумотини киритинг"
+    } else if (!form.invoicepack[form.invoicepack.length - 1].product) {
+      alert.value = "Маҳсулотни танланг"
+    } else if (!form.invoicepack[form.invoicepack.length - 1].count) {
+      alert.value = "Маҳсулот сонини киритинг"
+    } else if (!form.invoicepack[form.invoicepack.length - 1].total_price) {
+      alert.value = "Маҳсулот нарҳини киритинг"
+    } else {
+      await invoiceStore.addInvoice(form);
+      showModal.value = false;
+      await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
+      resetForm();
+    }
   } else {
-    await invoiceStore.updateInvoice(formEdite.value);
+    if (!formEdite.value[formEdite.value.length - 1].product) {
+      alert.value = "Маҳсулотни танланг"
+    } else if (!formEdite.value[formEdite.value.length - 1].room) {
+      alert.value = "Хонани танланг"
+    } else if (!formEdite.value[formEdite.value.length - 1].count) {
+      alert.value = "Маҳсулот сонини киритинг"
+    } else {
+      await invoiceStore.updateInvoice(formEdite.value);
+      showModal.value = false;
+      await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
+      resetForm();
+    }
   }
-  showModal.value = false;
-  await invoiceStore.get(limit, pageNum.value, titleInvoice.value);
-  resetForm();
 }
 
 function openDelete(id) {
@@ -145,6 +169,7 @@ function resetForm() {
   form.title = "";
   form.description = "";
   form.file = [];
+  alert.value = '';
   form.invoicepack = [
     {
       product: "",
@@ -167,10 +192,7 @@ function closeModal() {
   resetForm();
 }
 
-function addInvoice(invoice) {
-  let index = form.invoicepack.findIndex(
-    (item) => item.product === invoice.product,
-  );
+function addInvoice(index) {
   if (form.invoicepack[index]?.product && form.invoicepack[index]?.count && form.invoicepack[index]?.per_price) {
     form.invoicepack.push({
       product: "",
@@ -181,10 +203,7 @@ function addInvoice(invoice) {
   }
 }
 
-function editeInvoice(invoice) {
-  let index = formEdite.value.findIndex(
-    (item) => item.product === invoice.product,
-  );
+function editeInvoice(index) {
   if (formEdite.value[index]?.product && formEdite.value[index]?.room && formEdite.value[index]?.count) {
     formEdite.value.push({
       product: "",
@@ -194,19 +213,13 @@ function editeInvoice(invoice) {
   }
 }
 
-function deleteInvoice(invoice, length) {
-  let index = form.invoicepack.findIndex(
-    (item) => item.product === invoice.product,
-  );
+function deleteInvoice(index, length) {
   if (index !== -1 && length > 1) {
     form.invoicepack.splice(index, 1);
   }
 }
 
-function deleteInvoiceEdite(invoice, length) {
-  let index = formEdite.value.findIndex(
-    (item) => item.product === invoice.product,
-  );
+function deleteInvoiceEdite(index, length) {
   if (index !== -1 && length > 1) {
     formEdite.value.splice(index, 1);
   }
@@ -339,7 +352,6 @@ function closeInfo() {
   isInfo.value = false;
 }
 
-
 function openModal() {
   isMobile.value = false;
   showModal.value = true;
@@ -427,7 +439,8 @@ onUnmounted(() => {
     <!-- /Invoice Modal -->
     <InvoiceModal :show="showModal" @close="closeModal">
       <template #header>
-        Счёт фактура{{ form._id ? "ни узгартириш" : " Яратиш" }}
+        <p> Счёт фактура{{ form._id ? "ни узгартириш" : " Яратиш" }}</p>
+        <p class="text-red-500 text-base">{{ alert }}</p>
       </template>
       <!-- Edite Modal -->
       <template v-if="form._id" #body>
@@ -446,10 +459,10 @@ onUnmounted(() => {
                 v-model="item.room" />
               <BaseInput placeholder="Сони" inputType="number" class="col-span-3" v-model="item.count" />
               <div class="col-span-1 mb-2 flex items-center gap-1 lg:gap-4">
-                <BaseButton @click.prevent="deleteInvoiceEdite(item, formEdite.length)" color="red">
+                <BaseButton @click.prevent="deleteInvoiceEdite(index, formEdite.length)" color="red">
                   <TrashIcon class="relative h-4 w-4" />
                 </BaseButton>
-                <BaseButton v-if="index === formEdite.length - 1" @click.prevent="editeInvoice(item)" color="blue">
+                <BaseButton v-if="index === formEdite.length - 1" @click.prevent="editeInvoice(index)" color="blue">
                   <PlusIcon class="relative h-4 w-4" />
                 </BaseButton>
               </div>
@@ -499,10 +512,11 @@ onUnmounted(() => {
                 {{ invoiceSum(item) }}
               </span>
               <div class="col-span-1 mb-2 flex items-center gap-4">
-                <BaseButton @click.prevent="deleteInvoice(item, form.invoicepack.length)" color="red">
+                <BaseButton @click.prevent="deleteInvoice(index, form.invoicepack.length)" color="red">
                   <TrashIcon class="relative h-4 w-4" />
                 </BaseButton>
-                <BaseButton v-if="index === form.invoicepack.length - 1" @click.prevent="addInvoice(item)" color="blue">
+                <BaseButton v-if="index === form.invoicepack.length - 1" @click.prevent="addInvoice(index)"
+                  color="blue">
                   <PlusIcon class="relative h-4 w-4" />
                 </BaseButton>
               </div>

@@ -34,6 +34,7 @@ const limit = 14;
 const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('')
 
 const form = reactive({
   img: "",
@@ -67,14 +68,20 @@ const handleEdite = async (id) => {
 };
 
 async function submitForm() {
-  if (!form._id) {
-    await categoryStore.addCategory(form);
+  if (!form.img) {
+    alert.value = 'Расм юкланг'
+  } else if (!form.title) {
+    alert.value = 'Тоифа номини киритинг'
   } else {
-    await categoryStore.updateCategory(form);
+    if (!form._id) {
+      await categoryStore.addCategory(form);
+    } else {
+      await categoryStore.updateCategory(form);
+    }
+    await categoryStore.get(limit, pageNum.value, titleCategory.value);
+    showModal.value = false;
+    resetForm();
   }
-  await categoryStore.get(limit, pageNum.value, titleCategory.value);
-  showModal.value = false;
-  resetForm();
 }
 
 function openDelete(id) {
@@ -86,6 +93,7 @@ function resetForm() {
   delete form?._id;
   form.img = "";
   form.title = "";
+  alert.value = '';
 }
 
 function closeModal() {
@@ -336,7 +344,10 @@ onUnmounted(() => {
   <Teleport to="body">
     <!-- Add and Edite Modal -->
     <BaseModal :show="showModal" @close="closeModal">
-      <template #header>Тоифа{{ form._id ? "ни ўзгартириш" : " яратиш" }}</template>
+      <template #header>
+        <p>Тоифа{{ form._id ? "ни ўзгартириш" : " яратиш" }}</p>
+        <p class="text-red-500 text-base">{{ alert }}</p>
+      </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
           <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"

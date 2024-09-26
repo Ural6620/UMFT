@@ -37,6 +37,7 @@ const limit = 14;
 const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('');
 
 const form = reactive({
   img: "",
@@ -76,14 +77,26 @@ const handleEdite = async (id) => {
 };
 
 async function submitForm() {
-  if (!form._id) {
-    await productStore.addProduct(form);
+  if (!form.img) {
+    alert.value = 'Расм юкланг'
+  } else if (!form.categoryinventor) {
+    alert.value = 'Тоифани танланг'
+  } else if (!form.title) {
+    alert.value = 'Маҳсулот номини киритинг'
+  } else if (!form.model) {
+    alert.value = 'Маҳсулот моделини киритинг'
+  } else if (!form.text) {
+    alert.value = 'Маҳсулот хақида маълумотни киритинг'
   } else {
-    await productStore.updateProduct(form);
+    if (!form._id) {
+      await productStore.addProduct(form);
+    } else {
+      await productStore.updateProduct(form);
+    }
+    await productStore.get(limit, pageNum.value, titleProduct.value);
+    showModal.value = false;
+    resetForm();
   }
-  await productStore.get(limit, pageNum.value, titleProduct.value);
-  showModal.value = false;
-  resetForm();
 }
 
 function openDelete(id) {
@@ -98,6 +111,7 @@ function resetForm() {
   form.categoryinventor = "";
   form.model = "";
   form.text = "";
+  alert.value = "";
 }
 
 async function openModal() {
@@ -260,7 +274,7 @@ onUnmounted(() => {
       <BaseButton @click="clear" color="orange">
         <XMarkIcon class="h-4 w-4" />
       </BaseButton>
-      <BaseButton @click="showModal = true" color="green">
+      <BaseButton @click="openModal" color="green">
         <PlusIcon class="h-4 w-4" />
       </BaseButton>
     </div>
@@ -306,7 +320,9 @@ onUnmounted(() => {
     <!-- Add and Edite Modal -->
     <BaseModal :show="showModal" @close="closeModal">
       <template #header>
-        Маҳсулот{{ form._id ? "ни ўзгартириш" : " Яратиш" }}</template>
+        <p> Маҳсулот{{ form._id ? "ни ўзгартириш" : " Яратиш" }}</p>
+        <p class="text-red-500 text-base">{{ alert }}</p>
+      </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
           <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"

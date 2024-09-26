@@ -45,6 +45,7 @@ const selectedConstraints = ref({ facingMode: 'environment' });
 const currentIndex = ref(null);
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('')
 
 const form = reactive({
   employee: "",
@@ -68,9 +69,9 @@ function addInvoice(index) {
   }
 }
 
-function removeInvoice(item, length) {
+function removeInvoice(index, length) {
   if (length > 1) {
-    form.inventories.splice(item, 1);
+    form.inventories.splice(index, 1);
   }
 }
 
@@ -88,6 +89,7 @@ function closeModal() {
 
 function resetForm() {
   form.employee = "";
+  alert.value = ""
   form.inventories = [
     {
       room: '',
@@ -103,8 +105,12 @@ async function synchronAll() {
 }
 
 function submitForm() {
-  employeeStore.editeEmployee(form);
-  closeModal();
+  if (!form.inventories[form.inventories.length - 1]._id) {
+    alert.value = 'Қр кодни сканерланг'
+  } else {
+    employeeStore.editeEmployee(form);
+    closeModal();
+  }
 }
 
 async function goPage(n, item) {
@@ -423,7 +429,10 @@ onUnmounted(() => {
   <!-- Modal -->
   <Teleport to="body">
     <InvoiceModal :show="showModal" @close="closeModal">
-      <template #header>Маҳсулотга бириктириш</template>
+      <template #header>
+        <p>Маҳсулотга бириктириш</p>
+        <p class="text-red-500 text-base">{{ alert }}</p>
+      </template>
       <!-- Edite Modal -->
       <template #body>
         <BaseForm>
@@ -433,7 +442,7 @@ onUnmounted(() => {
                 <BaseButton @click.prevent="openCamera(index)" color="green">
                   <EyeIcon class="relative h-5 w-5" />
                 </BaseButton>
-                <BaseButton @click.prevent="removeInvoice(item, form.inventories.length)" color="red">
+                <BaseButton @click.prevent="removeInvoice(index, form.inventories.length)" color="red">
                   <TrashIcon class="relative h-5 w-5 text-red-600" />
                 </BaseButton>
                 <BaseButton v-if="index === form.inventories.length - 1" @click.prevent="addInvoice(index)"

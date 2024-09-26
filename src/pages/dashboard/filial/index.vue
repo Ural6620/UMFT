@@ -34,6 +34,7 @@ const limitQrCode = 14;
 const filialId = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const alert = ref('');
 
 const form = reactive({
   img: "",
@@ -80,7 +81,15 @@ const handleEdite = async (id) => {
 };
 
 async function submitForm() {
-  try {
+  if (!form.img) {
+    alert.value = 'Расм юкланг';
+  } else if (!form.title) {
+    alert.value = 'Филал номини киритинг';
+  } else if (!form.number) {
+    alert.value = 'Филал рақами киритинг';
+  } else if (!form.address) {
+    alert.value = 'Филал манзили киритинг';
+  } else {
     if (!form._id) {
       await filialStore.addFilial(form);
     } else {
@@ -89,9 +98,8 @@ async function submitForm() {
     await filialStore.get(limit, pageNum.value, titleFilial.value);
     showModal.value = false;
     resetForm();
-  } catch (error) {
-    console.error("Yuborishda xatolik:", error);
   }
+
 }
 
 function openDelete(id) {
@@ -105,6 +113,7 @@ function resetForm() {
   form.title = "";
   form.number = "";
   form.address = "";
+  alert.value = '';
 }
 
 function closeModal() {
@@ -315,7 +324,10 @@ onUnmounted(() => {
   <Teleport to="body">
     <!-- Add end Create Modal -->
     <BaseModal :show="showModal" @close="closeModal">
-      <template #header>Филиал{{ form._id ? "ни Узгартириш" : " яратиш" }}</template>
+      <template #header>
+        <p>Филиал{{ form._id ? "ни Узгартириш" : " яратиш" }}</p>
+        <p class="text-red-500">{{ alert }}</p>
+      </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
           <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
@@ -323,6 +335,7 @@ onUnmounted(() => {
           <BaseInput v-model="form.title" label="Номи" placeholder="Номи" inputType="string" />
           <BaseInput v-model="form.number" label="Рақами" placeholder="Рақами" inputType="number" />
           <BaseInput v-model="form.address" label="Манзили" placeholder="Манзили" inputType="string" />
+
         </BaseForm>
       </template>
       <template #button>

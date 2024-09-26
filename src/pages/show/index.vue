@@ -16,7 +16,7 @@ onMounted(async () => {
     <div class="flex flex-col gap-4 text-black w-96 border p-4 m-10 rounded-xl h-fit text-xl bg-white">
       <h4 class="text-center text-2xl font-bold">Товар ҳақида маълумот</h4>
       <div class="flex justify-center items-center p-10 bg-gray-200 rounded-xl">
-        <img class=" w-40 h-40 " :src="`${api.defaults.baseURL}/${qrCodeStore?.qrcodeById?.product?.img}`"
+        <img class="w-40 h-40 object-fill" :src="`${api.defaults.baseURL}/${qrCodeStore?.qrcodeById?.product?.img}`"
           alt="Продустга расм бириктирилмаган" />
       </div>
       <div>
@@ -27,11 +27,11 @@ onMounted(async () => {
           </p>
           <p class="text-gray-500">Филиал: <span class="text-black">{{ qrCodeStore?.qrcodeById?.room ?
             qrCodeStore?.qrcodeById?.room?.filial?.title :
-            `Ҳали бириктирилмаган`
+            `Бириктирилмаган`
               }}</span></p>
           <p class="text-gray-500">Хона рақами: <span class="text-black">{{ qrCodeStore?.qrcodeById?.room ?
             qrCodeStore?.qrcodeById?.room?.number :
-            `Ҳали бириктирилмаган`
+            `Бириктирилмаган`
               }}</span></p>
           <p class="text-gray-500">Фактура рақами: <span class="text-black">{{ qrCodeStore?.qrcodeById?.invoice?.title
               }}</span></p>
@@ -43,7 +43,8 @@ onMounted(async () => {
           </p>
           <div class="flex justify-between  ">
             <p class="text-gray-500">Расми: </p>
-            <img class="rounded-xl h-40 w-40 " :src="`${qrCodeStore?.qrcodeById?.employee?.image}`" alt="Ходим расми" />
+            <img class="rounded-xl h-40 w-40 object-fill" :src="`${qrCodeStore?.qrcodeById?.employee?.image}`"
+              alt="Ходим расми" />
           </div>
         </div>
       </div>
