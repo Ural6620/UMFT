@@ -5,7 +5,7 @@ import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, PlusIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
 import { QrcodeStream } from 'vue-qrcode-reader'
 import api from "@/plugins/axios";
@@ -335,6 +335,10 @@ function handleUpdate(newDepartment) {
   codeDepartment.code = newDepartment.code;
 }
 
+function reload() {
+  qrCodeStore.getAll(limit, pageInfo.value, "", "", "", "", empoyeeId.value);
+}
+
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   const queryPage = route.query.page || 1;
@@ -386,31 +390,39 @@ onUnmounted(() => {
 
   <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Ходим</h3>
-    <BaseButton @click="isMobile = true">
-      <Bars3Icon class="h-5 w-5" />
+    <BaseButton @click="isMobile = true" color="main">
+      <Bars3Icon class="h-6 w-6" />
     </BaseButton>
-    <div v-if="isMobile"
-      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
-      <!-- Filter Department -->
-      <SelectDepartment :placeholder="codeDepartment" :data="employeeStore.departments" class="w-64"
-        @update="handleUpdate" />
-      <!-- /Filter Department -->
 
+    <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <ArrowUturnLeftIcon class="h-5 w-5" />
+      </BaseButton>
       <!-- Filter title -->
-      <input type="text"
-        class="text-main focus:border-main w-full rounded-md border px-3 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
-        placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
-      <!-- /Filter title -->
+      <div class="flex flex-col gap-4 w-full mt-10">
+        <!-- Filter Department -->
+        <SelectDepartment :placeholder="codeDepartment" :data="employeeStore.departments" class="w-full" classes="py-2"
+          @update="handleUpdate" />
+        <!-- /Filter Department -->
 
-      <BaseButton @click="filter" color="blue" class="w-1/2">
-        <MagnifyingGlassIcon class="h-5 w-5" />
-      </BaseButton>
-      <BaseButton @click="clear" color="orange" class="w-1/2">
-        <XMarkIcon class="h-5 w-5" />
-      </BaseButton>
-      <BaseButton @click.prevent="synchronAll()" color="green" class="w-1/2">
-        <ArrowPathIcon class="h-5 w-5" />
-      </BaseButton>
+        <!-- Filter title -->
+        <input type="text"
+          class="text-main focus:border-main w-full rounded-md border px-3 py-2 placeholder:text-[#8BA3CB] focus:outline-none lg:w-40"
+          placeholder="ФИО" v-model="titleEmployee" @input="searchFullName" />
+        <!-- /Filter title -->
+
+        <div class="flex gap-4">
+          <BaseButton @click="filter" color="blue" class="w-1/2">
+            <MagnifyingGlassIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="clear" color="orange" class="w-1/2">
+            <XMarkIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="openModal" color="green" class="w-1/2">
+            <PlusIcon class="h-6 w-6" />
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </div>
   <!-- /Header Product -->
@@ -445,8 +457,8 @@ onUnmounted(() => {
                 <BaseButton @click.prevent="removeInvoice(index, form.inventories.length)" color="red">
                   <TrashIcon class="relative h-5 w-5 text-red-600" />
                 </BaseButton>
-                <BaseButton v-if="index === form.inventories.length - 1" @click.prevent="addInvoice(index)"
-                  color="blue">
+                <BaseButton v-if="index === form.inventories.length - 1 && form.inventories[index]._id"
+                  @click.prevent="addInvoice(index)" color="blue">
                   <PlusIcon class="relative h-5 w-5" />
                 </BaseButton>
                 <p class="text-xl">{{ item.product }}</p>
@@ -469,12 +481,13 @@ onUnmounted(() => {
     <InfoRoomModal :show="isInfo" @close="closeInfo">
       <template #header>Ходим: {{ qrCodeStore.qrCodes[0]?.employee?.full_name }}</template>
       <template #body>
-        <div v-if="!qrCodeStore.qrCodes.length" class="text-main  rounded-2xl bg-white py-2 text-center">
+        <div v-if="!qrCodeStore.qrCodes.length" class="text-main  rounded-2xl bg-white py-2 text-center min-h-96">
           Бу ходима маҳсулот бириктирилмаган!
         </div>
-        <div v-else class=" overflow-auto rounded-2xl bg-white py-2">
+        <div v-else class=" overflow-auto rounded-2xl bg-white py-2 min-h-96">
           <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limit"
-            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile"
+            @reload="reload" />
         </div>
       </template>
       <template #footer>
@@ -498,11 +511,11 @@ onUnmounted(() => {
     <!-- /showModal -->
 
     <!-- cameraModal -->
-    <BaseModal :show="isCameraActive" @close="closeCamera">
+    <BaseModal :show="isCameraActive" @close="closeCamera" class="w-1/2">
       <template #header>Қр Код: {{ qrCode }} </template>
       <template #body>
         <div class="w-96 h-96 relative left-1/2 transform -translate-x-1/2">
-          <BaseButton @click.prevent="switchCamera" color="red" class="absolute top-0 right-0 z-20">
+          <BaseButton @click.prevent="switchCamera" color="blue" class="absolute top-0 right-0 z-20">
             <ArrowPathIcon class="w-10 h-10" />
           </BaseButton>
           <qrcode-stream :constraints="selectedConstraints" @detect="onDetect" @error="onError" class="rounded-2xl" />

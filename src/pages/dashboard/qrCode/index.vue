@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
-import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
+import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon, MagnifyingGlassIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
 import { colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import JSZip from "jszip";
@@ -180,6 +180,10 @@ function handleRoom(newRoom) {
   titleRoom.title = newRoom.title;
 }
 
+function reload() {
+  qrCodeStore.getAll(limit, pageNum.value, titleProduct._id, titleRoom._id);
+}
+
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   const queryPage = route.query.page || 1;
@@ -227,8 +231,8 @@ onUnmounted(() => {
   </div>
   <div v-else class="flex justify-between items-center relative">
     <h3 class="text-main text-xl font-semibold">Қр Код</h3>
-    <BaseButton @click="isMobile = true">
-      <Bars3Icon class="h-5 w-5" />
+    <BaseButton @click="isMobile = true" color="main">
+      <Bars3Icon class="h-6 w-6" />
     </BaseButton>
     <div v-if="isMobile"
       class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
@@ -249,13 +253,39 @@ onUnmounted(() => {
         <ArrowDownOnSquareStackIcon class="h-5 w-5" />
       </BaseButton>
     </div>
+    <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <ArrowUturnLeftIcon class="h-5 w-5" />
+      </BaseButton>
+      <!-- Filter title -->
+      <div class="flex flex-col gap-4 w-full mt-10">
+        <!-- Filter Qr Code -->
+        <SelectQr :placeholder="titleProduct" :data="productStore.products" class="w-full" @update="handleProduct" />
+        <!-- /Filter Qr Code -->
+
+        <!-- Filter Room -->
+        <SelectQr :placeholder="titleRoom" :data="roomStore.rooms" class="w-full" @update="handleRoom" />
+        <!-- /Filter Room -->
+        <div class="flex gap-4">
+          <BaseButton @click="filter" color="blue" class="w-1/2">
+            <MagnifyingGlassIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="clear" color="orange" class="w-1/2">
+            <XMarkIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="openDownload" color="green" class="w-1/2">
+            <ArrowDownOnSquareStackIcon class="h-6 w-6" />
+          </BaseButton>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- /Header Qr Code -->
 
   <!-- Table -->
   <div class="overflow-auto rounded-2xl bg-white flex-1">
     <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageNum" :limit="limit" @download="downloadFile"
-      @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
+      @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" @reload="reload" />
   </div>
   <!-- /Table -->
 

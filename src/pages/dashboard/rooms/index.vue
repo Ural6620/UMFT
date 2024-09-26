@@ -297,6 +297,10 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+function reload() {
+  qrCodeStore.getAll(limitQrCode, pageInfo.value, "", roomId.value);
+}
+
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   await filialStore.get(0);
@@ -511,7 +515,8 @@ onUnmounted(() => {
         </div>
         <div v-else class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
           <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
-            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile"
+            @reload="reload" />
         </div>
       </template>
       <template #footer>

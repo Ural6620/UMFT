@@ -7,6 +7,10 @@ const props = defineProps({
   label: String,
   placeholder: Object,
   data: Array,
+  classes: {
+    type: String,
+    default: "py-1.5"
+  }
 });
 const emit = defineEmits(['update']);
 
@@ -27,8 +31,8 @@ function handleOption(item) {
     </label>
     <div>
       <button type="button" @click="isActive = !isActive"
-        class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none sm:text-sm sm:leading-6"
-        aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+        class="focus:ring-main relative w-full cursor-pointer rounded-md bg-white pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none text-base"
+        aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label" :class="props.classes">
         <span class="flex w-full items-center justify-between">
           <span class="block truncate text-base text-[#8BA3CB]">{{
             props.placeholder.name

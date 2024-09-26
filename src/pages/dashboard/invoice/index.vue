@@ -5,7 +5,7 @@ import { useProductStore } from "@/stores/product";
 import { useRoomStore } from "@/stores/room";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoute, useRouter } from "vue-router";
-import { TrashIcon, ArrowDownOnSquareIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/vue/24/solid";
+import { TrashIcon, ArrowDownOnSquareIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
 import DeleteModal from "@/components/ui/DeleteModal.vue";
@@ -361,6 +361,10 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+function reload() {
+  qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
+}
+
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   const queryPage = Number(route.query.page) || 1;
@@ -400,25 +404,31 @@ onUnmounted(() => {
 
   <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Счёт фактура</h3>
-    <BaseButton @click="isMobile = true">
-      <Bars3Icon class="h-5 w-5" />
+    <BaseButton @click="isMobile = true" color="main">
+      <Bars3Icon class="h-6 w-6" />
     </BaseButton>
-    <div v-if="isMobile"
-      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+    <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <ArrowUturnLeftIcon class="h-5 w-5" />
+      </BaseButton>
       <!-- Filter title -->
-      <input type="number"
-        class="text-main focus:border-main w-1/2 truncate rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-        placeholder="Фактура рақами" v-model="titleInvoice" />
+      <div class="flex flex-col gap-4 w-full mt-10">
+        <input type="number"
+          class="text-main focus:border-main w-full text-xl truncate rounded-md border px-4 py-2 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Фактура рақами" v-model="titleInvoice" />
 
-      <BaseButton @click="filter" color="blue" class="w-1/2">
-        <MagnifyingGlassIcon class="h-5 w-5" />
-      </BaseButton>
-      <BaseButton @click="clear" color="orange" class="w-1/2">
-        <XMarkIcon class="h-5 w-5" />
-      </BaseButton>
-      <BaseButton @click="openModal" color="green" class="w-1/2">
-        <PlusIcon class="h-5 w-5" />
-      </BaseButton>
+        <div class="flex gap-4">
+          <BaseButton @click="filter" color="blue" class="w-1/2">
+            <MagnifyingGlassIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="clear" color="orange" class="w-1/2">
+            <XMarkIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="openModal" color="green" class="w-1/2">
+            <PlusIcon class="h-6 w-6" />
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </div>
   <!-- /Header Product -->
@@ -479,7 +489,7 @@ onUnmounted(() => {
             <BaseInput v-model="form.title" label="Фактура рақами" placeholder="Фактура рақами" inputType="number" />
             <BaseInput v-model="form.description" label="Тавсиф" placeholder="Тавсиф" inputType="string" />
             <BaseInput v-model="form.model" label="Модел" placeholder="Модел" inputType="string" />
-            <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" />
+            <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" classes="py-1.5" />
           </div>
           <h6 v-if="form.file.length > 0" class="col-span-4 mb-2 text-xl font-semibold text-[#718EBF]">
             Файллар
@@ -567,7 +577,8 @@ onUnmounted(() => {
       <template #body>
         <div class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
           <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
-            @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa" />
+            @download="downloadFile" @showQr="showFile" :count="qrCodeStore.count" :summa="qrCodeStore.summa"
+            @reload="reload" />
         </div>
       </template>
       <template #footer>

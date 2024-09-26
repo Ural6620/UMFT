@@ -18,6 +18,8 @@ const colorClasses = computed(() => {
       return 'text-red-600 bg-red-100 hover:bg-red-300';
     case 'yellow':
       return 'text-yellow-600 bg-yellow-100 hover:bg-yellow-300';
+    case 'main':
+      return 'text-main';
     default:
       return 'text-gray-600 bg-gray-100 hover:bg-gray-300'; // Default rang
   }

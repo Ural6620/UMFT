@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useFilialStore } from "@/stores/filial";
 import { useRoute, useRouter } from "vue-router";
-import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
+import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, ArrowUturnDownIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { colFilial, colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
@@ -246,6 +246,11 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+
+function reload() {
+  qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
+}
+
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   const queryPage = Number(route.query.page) || 1;
@@ -285,25 +290,31 @@ onUnmounted(() => {
 
   <div v-else class="flex justify-between  items-center relative">
     <h3 class="text-main text-xl font-semibold">Филиал</h3>
-    <BaseButton @click="isMobile = true">
-      <Bars3Icon class="h-5 w-5" />
+    <BaseButton @click="isMobile = true" color="main">
+      <Bars3Icon class="h-6 w-6" />
     </BaseButton>
-    <div v-if="isMobile"
-      class="flex flex-col items-center absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
-      <!-- Filter title -->
-      <input type="text"
-        class="text-main focus:border-main w-1/2 rounded-md border px-4 py-1.5 placeholder:text-[#8BA3CB] focus:outline-none"
-        placeholder="Филиал номи" v-model="titleFilial" />
 
-      <BaseButton @click="filter" color="yellow" class="w-1/2">
-        <MagnifyingGlassIcon class="h-5 w-5" />
+    <div v-if="isMobile" class="flex flex-col absolute gap-4 top-0 right-0 bg-white p-10 z-50 w-screen h-screen">
+      <BaseButton color="red" @click="isMobile = false" class="w-fit absolute top-4 right-4">
+        <ArrowUturnLeftIcon class="h-5 w-5" />
       </BaseButton>
-      <BaseButton @click="clear" color="red" class="w-1/2">
-        <XMarkIcon class="h-5 w-5" />
-      </BaseButton>
-      <BaseButton @click="openModal" color="blue" class="w-1/2">
-        <PlusIcon class="h-5 w-5" />
-      </BaseButton>
+      <!-- Filter title -->
+      <div class="flex flex-col gap-4 w-full mt-10">
+        <input type="text"
+          class="text-main focus:border-main w-full text-xl rounded-md border px-4 py-2 placeholder:text-[#8BA3CB] focus:outline-none"
+          placeholder="Филиал номи" v-model="titleFilial" />
+        <div class="flex gap-4">
+          <BaseButton @click="filter" color="blue" class="w-1/2">
+            <MagnifyingGlassIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="clear" color="orange" class="w-1/2">
+            <XMarkIcon class="h-6 w-6" />
+          </BaseButton>
+          <BaseButton @click="openModal" color="green" class="w-1/2">
+            <PlusIcon class="h-6 w-6" />
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </div>
   <!-- /Header Category -->
@@ -330,12 +341,11 @@ onUnmounted(() => {
       </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
-          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
+          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'" classes="py-1.5"
             @change="handleImage" />
           <BaseInput v-model="form.title" label="Номи" placeholder="Номи" inputType="string" />
           <BaseInput v-model="form.number" label="Рақами" placeholder="Рақами" inputType="number" />
           <BaseInput v-model="form.address" label="Манзили" placeholder="Манзили" inputType="string" />
-
         </BaseForm>
       </template>
       <template #button>
@@ -371,7 +381,8 @@ onUnmounted(() => {
         </div>
         <div v-else class="overflow-auto rounded-2xl bg-white py-2 min-h-[560px] lg:min-h-[750px]">
           <qrCodeTable :columns="colInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limitQrCode"
-            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile" />
+            :count="qrCodeStore.count" :summa="qrCodeStore.summa" @download="downloadFile" @showQr="showFile"
+            @reload="reload" />
         </div>
       </template>
       <template #footer>

@@ -1,6 +1,8 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { ref } from "vue";
+import LogautModal from "@/components/ui/LogautModal.vue";
 import {
   HomeIcon,
   BuildingOffice2Icon,
@@ -12,11 +14,11 @@ import {
   UserIcon,
   ArrowLeftStartOnRectangleIcon,
 } from "@heroicons/vue/24/solid";
-import BaseButton from "@/components/ui/BaseButton.vue";
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const showModal = ref(false);
 
 const menuLists = [
   {
@@ -90,11 +92,12 @@ function logout() {
         </router-link>
       </div>
     </div>
-    <div class="flex items-center lg:pl-8 pb-6 lg:pb-10 group cursor-pointer gap-3 w-fit" @click="logout">
+    <div class="flex items-center lg:pl-8 pb-6 lg:pb-10 group cursor-pointer gap-3 w-fit" @click="showModal = true">
       <button class="h-6 w-6 text-[#B1B1B1] group-hover:text-main">
         <ArrowLeftStartOnRectangleIcon class="h-6 w-6 transform rotate-180 text-[#B1B1B1] group-hover:text-main" />
       </button>
       <p class="hidden font-medium lg:block text-[#B1B1B1] group-hover:text-main">Чиқиш</p>
     </div>
+    <LogautModal :show="showModal" @close="showModal = false" @delete="logout" class="z-50" />
   </div>
 </template>

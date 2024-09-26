@@ -39,7 +39,8 @@ async function deleteEmployee(item) {
   form.price = item.price;
   form.invoice = item.invoice?._id;
   form.product = item.product?._id;
-  await qrCodeStore.updateQrCode(form)
+  await qrCodeStore.updateQrCode(form);
+  emit("reload");
 }
 </script>
 <template>
@@ -94,9 +95,9 @@ async function deleteEmployee(item) {
         </td>
       </tr>
     </tbody>
-    <tfoot v-if="(page - 1) * limit + data.length === count" class="px-10">
+    <tfoot v-if="(page - 1) * limit + data.length === count">
       <tr>
-        <td colspan="8" class="px-6 py-3">
+        <td colspan="8" class="px-6 py-2 text-main text-lg font-semibold border-main border-t mt-10">
           Жами: {{ summa.toLocaleString() + " сум" }}
         </td>
       </tr>
