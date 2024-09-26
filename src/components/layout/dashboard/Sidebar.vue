@@ -70,7 +70,7 @@ function logout() {
 </script>
 
 <template>
-  <div class="flex flex-row gap-4 lg:flex-col lg:justify-between justify-center">
+  <div class="flex flex-row gap-4 lg:flex-col lg:justify-between justify-center relatice z-[100]">
     <div class="flex flex-col items-center lg:border-r border-[#F5F7FA]">
       <div class="top-0 hidden h-20 items-center justify-center p-4 py-4 text-[#5A67BA] lg:flex">
         <img src="@/assets/logo.svg" alt="" class="w-full max-w-[200px]" />

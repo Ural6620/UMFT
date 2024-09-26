@@ -36,7 +36,7 @@ function handleMain(item) {
           {{ (page - 1) * limit + (index + 1) }}
         </td>
         <td class="p-2 lg:px-6">
-          <img class="h-12 w-12 rounded-md object-fill" :src="`${item.image}`" alt="employee image" />
+          <img class="h-12 w-12 rounded-md object-cover" :src="`${item.image}`" alt="employee image" />
         </td>
         <td class="truncate px-6 py-2">{{ item.full_name }}</td>
         <td class="truncate px-6 py-2">{{ item.department?.name }}</td>

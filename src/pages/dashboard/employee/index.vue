@@ -482,7 +482,7 @@ onUnmounted(() => {
       <template #header>Ходим: {{ qrCodeStore.qrCodes[0]?.employee?.full_name }}</template>
       <template #body>
         <div v-if="!qrCodeStore.qrCodes.length" class="text-main  rounded-2xl bg-white py-2 text-center min-h-96">
-          Бу ходима маҳсулот бириктирилмаган!
+          Бу ходимга маҳсулот бириктирилмаган!
         </div>
         <div v-else class=" overflow-auto rounded-2xl bg-white py-2 min-h-96">
           <qrCodeTable :columns="columnsInfo" :data="qrCodeStore.qrCodes" :page="pageInfo" :limit="limit"
