@@ -368,8 +368,8 @@ onUnmounted(() => {
       </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
-          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'" classes="py-1.5"
-            @change="handleImage" />
+          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
+            classes="py-1 lg:py-1.5" @change="handleImage" />
           <BaseInput v-model="form.title" label="Тоифа номи" placeholder="Тоифа номи" inputType="string" />
         </BaseForm>
       </template>

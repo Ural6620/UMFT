@@ -73,6 +73,7 @@ const handleEdite = async (id) => {
   form.categoryinventor = productStore.productById?.categoryinventor?._id;
   form.model = productStore.productById.model;
   form.text = productStore.productById.text;
+  console.log(form)
   showModal.value = true;
 };
 
@@ -335,8 +336,8 @@ onUnmounted(() => {
       </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
-          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'" classes="py-1.5"
-            @change="handleImage" />
+          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
+            classes="py-[4px] lg:py-1.5" @change="handleImage" />
           <SelectFilial label="Тоифа" :placeholder="categoryStore.categoryById?.title || 'Тоифани танлаш'
             " :data="categoryStore.categories" v-model="form.categoryinventor" />
           <BaseInput v-model="form.title" label="Маҳсулот номи" placeholder="Маҳсулот номи" inputType="string" />

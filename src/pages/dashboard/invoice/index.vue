@@ -491,7 +491,7 @@ onUnmounted(() => {
           <div class="col-span-4 grid grid-cols-2 items-center gap-x-4">
             <BaseInput v-model="form.title" label="Фактура рақами" placeholder="Фактура рақами" inputType="number" />
             <BaseInput v-model="form.description" label="Тавсиф" placeholder="Тавсиф" inputType="string" />
-            <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" classes="py-1.5" />
+            <BaseInput label="Файл" placeholder="Файл" inputType="file" @change="handleFile" classes="py-1 lg:py-1.5" />
           </div>
           <h6 v-if="form.file.length > 0" class="col-span-4 mb-2 text-xl font-semibold text-[#718EBF]">
             Файллар

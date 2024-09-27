@@ -92,7 +92,7 @@ function logout() {
         </router-link>
       </div>
     </div>
-    <div class="flex items-center lg:pl-8 pb-6 lg:pb-10 group cursor-pointer gap-3 w-fit relative z-50"
+    <div class="flex items-center lg:pl-8 pb-6 pr-2 lg:pb-10 group cursor-pointer gap-3 w-fit relative z-50"
       @click="showModal = true">
       <button class="h-6 w-6 text-[#B1B1B1] group-hover:text-main">
         <ArrowLeftStartOnRectangleIcon class="h-6 w-6 transform rotate-180 text-[#B1B1B1] group-hover:text-main" />

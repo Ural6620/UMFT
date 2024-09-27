@@ -17,8 +17,8 @@ const form = reactive({
 const submitForm = async () => {
   if (form.login && form.password) {
     await authStore.login({
-      login: form.login,
-      password: form.password,
+      login: form.login.trim(),
+      password: form.password.trim(),
     });
 
     if (authStore.isAuthenticated) {
@@ -39,7 +39,7 @@ onMounted(async () => {
 <template>
   <div class="bg-main flex h-screen w-screen items-center justify-center">
     <div class="flex flex-col items-center justify-center gap-4">
-      <img src="@/assets/logo.svg" alt="" class="w-[384px]" />
+      <img src="@/assets/logo.svg" alt="" class="w-3/4 lg:w-[384px]" />
       <div class="text-center text-[36px] font-bold text-white">
         Инвентаризация
       </div>
