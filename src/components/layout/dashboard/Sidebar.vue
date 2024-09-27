@@ -70,7 +70,7 @@ function logout() {
 </script>
 
 <template>
-  <div class="flex flex-row gap-4 lg:flex-col lg:justify-between justify-center relatice z-[100]">
+  <div class="flex flex-row gap-4 lg:flex-col lg:justify-between justify-center relatice z-20">
     <div class="flex flex-col items-center lg:border-r border-[#F5F7FA]">
       <div class="top-0 hidden h-20 items-center justify-center p-4 py-4 text-[#5A67BA] lg:flex">
         <img src="@/assets/logo.svg" alt="" class="w-full max-w-[200px]" />
@@ -92,7 +92,8 @@ function logout() {
         </router-link>
       </div>
     </div>
-    <div class="flex items-center lg:pl-8 pb-6 lg:pb-10 group cursor-pointer gap-3 w-fit" @click="showModal = true">
+    <div class="flex items-center lg:pl-8 pb-6 lg:pb-10 group cursor-pointer gap-3 w-fit relative z-50"
+      @click="showModal = true">
       <button class="h-6 w-6 text-[#B1B1B1] group-hover:text-main">
         <ArrowLeftStartOnRectangleIcon class="h-6 w-6 transform rotate-180 text-[#B1B1B1] group-hover:text-main" />
       </button>
