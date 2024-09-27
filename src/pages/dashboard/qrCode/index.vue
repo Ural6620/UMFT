@@ -118,8 +118,10 @@ function closeFileModal() {
 
 async function filter() {
   pageNum.value = 1;
-  console.log(titleProduct._id, titleRoom._id)
-  console.log(titleProduct.title, titleRoom.title)
+  await router.push({
+    name: "qrCode",
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
+  });
   await qrCodeStore.getAll(
     limit,
     pageNum.value,
@@ -132,7 +134,7 @@ async function goPage(n) {
   pageNum.value = n;
   await router.push({
     name: "qrCode",
-    query: { page: pageNum.value, code: titleProduct._id },
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
   });
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
 }
@@ -153,17 +155,17 @@ async function nextPage() {
 }
 
 
-function clear() {
+async function clear() {
   titleProduct._id = "";
   titleRoom._id = "";
   titleProduct.title = "Маҳсулотни танланг";
   titleRoom.title = "Хонани танланг";
   pageNum.value = 1;
-  router.push({
+  await router.push({
     name: "qrCode",
-    query: { page: pageNum.value, code: titleProduct._id },
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
   });
-  qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
 }
 
 function handleResize() {
@@ -192,6 +194,10 @@ onMounted(async () => {
   pageNum.value = Number(queryPage) || 1;
   titleProduct._id = queryProduct || "";
   titleRoom._id = queryRoom || "";
+  await router.push({
+    name: "qrCode",
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
+  });
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id, titleRoom._id);
   await roomStore.get(0);
   await productStore.get(0);
