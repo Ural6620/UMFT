@@ -78,7 +78,9 @@ const links = [
     },
     props: route => ({
       pageNum: route.query.page || 1,
-      titleProduct: route.query.employee || ''
+      titleEmployee: route.query.employee || '',
+      code: route.query.code || '',
+      name: route.query.name || '',
     }),
   },
   {
@@ -91,7 +93,9 @@ const links = [
     props: route => ({
       pageNum: route.query.page || 1,
       titleProduct: route.query.product || '',
-      titleRoom: route.query.room || ''
+      titleRoom: route.query.room || '',
+      titleRoom: route.query.titleRoom ,
+      titleProduct: route.query.titleProduct,
     })
   },
 ];

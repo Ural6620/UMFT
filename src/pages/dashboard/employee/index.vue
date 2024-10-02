@@ -5,13 +5,14 @@ import { useEmployeeStore } from "@/stores/employee";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
 import { useQrCodeStore } from "@/stores/qrCode";
-import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, PlusIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
+import { ArrowPathIcon, TrashIcon, EyeIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/vue/24/solid";
 import { colEmployee } from "@/components/constants/constants";
 import { QrcodeStream } from 'vue-qrcode-reader'
 import api from "@/plugins/axios";
 import EmployeeTable from "@/components/table/EmployeeTable.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
+import DeleteModal from "@/components/ui/DeleteModal.vue";
 import SelectDepartment from "@/components/form/SelectDepartment.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
@@ -45,7 +46,17 @@ const selectedConstraints = ref({ facingMode: 'environment' });
 const currentIndex = ref(null);
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
-const alert = ref('')
+const alert = ref('');
+const isDeleteEmployee = ref(false);
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
+})
 
 const form = reactive({
   employee: "",
@@ -187,10 +198,9 @@ async function nextPage(item) {
 
 async function filter() {
   pageNum.value = 1;
-  console.log(codeDepartment)
   router.push({
     name: "employee",
-    query: { page: pageNum.value, code: codeDepartment.code, employee: titleEmployee.value },
+    query: { page: pageNum.value, code: codeDepartment.code, name: codeDepartment.name, employee: titleEmployee.value },
   });
   await employeeStore.get(
     limit,
@@ -255,16 +265,21 @@ function closeInfo() {
   isInfo.value = false;
 }
 
-function clear() {
+async function clear() {
   titleEmployee.value = "";
   codeDepartment.code = "";
   codeDepartment.name = "Кафедрани танланг";
   pageNum.value = 1;
   router.push({
     name: "employee",
-    query: { page: pageNum.value, employee: titleEmployee.value },
+    query: { page: pageNum.value, code: codeDepartment.code, name: codeDepartment.name, employee: titleEmployee.value },
   });
-  employeeStore.get(limit, pageNum.value, titleEmployee.value, codeDepartment.code);
+  await employeeStore.get(
+    limit,
+    pageNum.value,
+    titleEmployee.value,
+    codeDepartment.code,
+  );
 }
 
 function openCamera(index) {
@@ -335,18 +350,40 @@ function handleUpdate(newDepartment) {
   codeDepartment.code = newDepartment.code;
 }
 
-function reload() {
+async function reload(id) {
+  isInfo.value = false;
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
+
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limit, pageInfo.value, "", "", "", "", empoyeeId.value);
+  isInfo.value = true;
+}
+
+function closeEmployee() {
+  isDeleteEmployee.value = false;
+  isInfo.value = true;
 }
 
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
   const queryPage = route.query.page || 1;
   const queryTitle = route.query.employee;
-  const queryCode = route.query.code;
+  const queryCode = route.query.code || "";
+  const queryName = route.query.name || "Кафедрани танланг";
   pageNum.value = queryPage;
   titleEmployee.value = queryTitle;
   codeDepartment.code = queryCode;
+  codeDepartment.name = queryName;
   await employeeStore.get(
     limit,
     pageNum.value,
@@ -523,6 +560,24 @@ onUnmounted(() => {
       </template>
     </BaseModal>
     <!-- /cameraModal -->
+
+    <!-- Delete employee -->
+    <DeleteModal :show="isDeleteEmployee" @close="closeEmployee" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete employee -->
   </Teleport>
   <!-- /Modal -->
 </template>

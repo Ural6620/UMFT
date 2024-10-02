@@ -5,7 +5,7 @@ import { useProductStore } from "@/stores/product";
 import { useRoomStore } from "@/stores/room";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoute, useRouter } from "vue-router";
-import { TrashIcon, ArrowDownOnSquareIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
+import { TrashIcon, ArrowDownOnSquareIcon, PlusIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/vue/24/solid";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import InvoiceModal from "@/components/ui/InvoiceModal.vue";
 import DeleteModal from "@/components/ui/DeleteModal.vue";
@@ -42,7 +42,17 @@ const qrCode = ref("");
 const urlQrCode = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
-const alert = ref('')
+const alert = ref('');
+const isDeleteEmployee = ref(false);
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
+})
 
 const form = reactive({
   title: "",
@@ -363,8 +373,28 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
-function reload() {
+async function reload(id) {
+  isInfo.value = false;
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
+
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", "", invoiceId.value);
+  isInfo.value = true;
+}
+
+function closeEmployee() {
+  isDeleteEmployee.value = false;
+  isInfo.value = true;
 }
 
 onMounted(async () => {
@@ -602,6 +632,24 @@ onUnmounted(() => {
       </template>
     </BaseModal>
     <!-- /showModal -->
+
+    <!-- Delete employee -->
+    <DeleteModal :show="isDeleteEmployee" @close="closeEmployee" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete employee -->
   </Teleport>
   <!-- /Modal -->
 </template>

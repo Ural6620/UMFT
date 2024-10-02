@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { useFilialStore } from "@/stores/filial";
 import { useRoute, useRouter } from "vue-router";
-import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, ArrowUturnDownIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
+import { PlusIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { colFilial, colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
@@ -15,6 +15,7 @@ import FilialTable from "@/components/table/FilialTable.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import qrCodeTable from "@/components/table/qrCodeTable.vue";
 import InfoRoomModal from "@/components/ui/InfoRoomModal.vue";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -34,6 +35,7 @@ const limitQrCode = 14;
 const filialId = ref("");
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
+const isDeleteEmployee = ref(false);
 const alert = ref('');
 
 const form = reactive({
@@ -42,6 +44,15 @@ const form = reactive({
   number: "",
   address: "",
 });
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
+})
 
 async function handleImage(event) {
   const file = event.target.files[0];
@@ -246,9 +257,28 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
+async function reload(id) {
+  isInfo.value = false;
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
 
-function reload() {
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limitQrCode, pageInfo.value, "", "", '', '', '', '', filialId.value);
+  isInfo.value = true;
+}
+
+function closeEmployee() {
+  isDeleteEmployee.value = false;
+  isInfo.value = true;
 }
 
 onMounted(async () => {
@@ -341,8 +371,8 @@ onUnmounted(() => {
       </template>
       <template #body>
         <BaseForm class="grid grid-cols-2 gap-2">
-          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'" classes="py-1 lg:py-1.5"
-            @change="handleImage" />
+          <BaseInput label="Расм" inputType="file" :placeholder="form.img ? form.img : 'add image'"
+            classes="py-1 lg:py-1.5" @change="handleImage" />
           <BaseInput v-model="form.title" label="Номи" placeholder="Номи" inputType="string" />
           <BaseInput v-model="form.number" label="Рақами" placeholder="Рақами" inputType="number" />
           <BaseInput v-model="form.address" label="Манзили" placeholder="Манзили" inputType="string" />
@@ -404,6 +434,23 @@ onUnmounted(() => {
       </template>
     </BaseModal>
     <!-- /showModal -->
+    <!-- Delete employee -->
+    <DeleteModal :show="isDeleteEmployee" @close="closeEmployee" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete employee -->
   </Teleport>
   <!-- /Modal  -->
 

@@ -11,7 +11,7 @@ const props = defineProps({
     <div v-if="show"
       class="fixed z-50 top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.5)] transition-all duration-300 ease-in flex">
       <div
-        class="modal-container flex flex-col items-center w-5/6 lg:w-1/5 m-auto px-5 py-8 bg-white rounded-2xl transition-all duration-300 ease-in shadow-[0_2px_8px_rgba(0,0,0,0.33)]">
+        class="modal-container flex flex-col items-center w-5/6 lg:w-1/4 m-auto px-5 py-8 bg-white rounded-2xl transition-all duration-300 ease-in shadow-[0_2px_8px_rgba(0,0,0,0.33)]">
         <div class="modal-header text-lg pb-3">
           <slot />
         </div>

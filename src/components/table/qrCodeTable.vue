@@ -1,18 +1,11 @@
 <script setup>
 import { defineProps, defineEmits, reactive } from "vue";
-import { ArrowDownOnSquareIcon, EyeIcon, TrashIcon } from "@heroicons/vue/24/solid";
+import { ArrowDownOnSquareIcon, EyeIcon, TrashIcon, UserMinusIcon } from "@heroicons/vue/24/solid";
 import { useQrCodeStore } from "@/stores/qrCode";
 import BaseButton from "../ui/BaseButton.vue";
 
 const qrCodeStore = useQrCodeStore();
-const form = reactive({
-  _id: '',
-  employee: null,
-  room: '',
-  price: 0,
-  invoice: '',
-  product: ''
-})
+
 const props = defineProps({
   columns: Array,
   data: Array,
@@ -22,7 +15,7 @@ const props = defineProps({
   summa: Number,
 });
 
-const emit = defineEmits(["download", "showQr"]);
+const emit = defineEmits(["download", "showQr", "reload"]);
 
 function downloadFile(item) {
   emit("download", item._id);
@@ -32,15 +25,8 @@ function showFile(item) {
   emit("showQr", item._id);
 }
 
-async function deleteEmployee(item) {
-  form._id = item._id;
-  form.employee = null;
-  form.room = item.room?._id;
-  form.price = item.price;
-  form.invoice = item.invoice?._id;
-  form.product = item.product?._id;
-  await qrCodeStore.updateQrCode(form);
-  emit("reload");
+function deleteEmployee(item) {
+  emit("reload", item._id);
 }
 </script>
 <template>
@@ -82,14 +68,14 @@ async function deleteEmployee(item) {
         </td>
         <td class="px-4 py-2">
           <div class="flex items-center justify-end gap-4">
+            <BaseButton v-if="item.employee" @click="deleteEmployee(item)" color="red">
+              <UserMinusIcon class="h-3.5 w-3.5" />
+            </BaseButton>
             <BaseButton @click="downloadFile(item)" color="yellow">
               <ArrowDownOnSquareIcon class="h-3.5 w-3.5" />
             </BaseButton>
             <BaseButton @click="showFile(item)" color="blue">
               <EyeIcon class="h-3.5 w-3.5" />
-            </BaseButton>
-            <BaseButton @click="deleteEmployee(item)" color="red">
-              <TrashIcon class="h-3.5 w-3.5" />
             </BaseButton>
           </div>
         </td>

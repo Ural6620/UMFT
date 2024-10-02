@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { Bars3Icon, PlusIcon, XMarkIcon, MagnifyingGlassIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
+import { Bars3Icon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { useRoute, useRouter } from "vue-router";
 import { useProductStore } from "@/stores/product";
 import { useCategoryStore } from "@/stores/category";
@@ -38,6 +38,7 @@ const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
 const alert = ref('');
+const isDeleteEmployee = ref(false);
 
 const form = reactive({
   img: "",
@@ -45,6 +46,15 @@ const form = reactive({
   categoryinventor: "",
   model: "",
   text: "",
+});
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
 });
 
 async function handleImage(event) {
@@ -246,8 +256,28 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
-function reload() {
+async function reload(id) {
+  isInfo.value = false;
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
+
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limitQrCode, pageInfo.value, productId.value, "");
+  isInfo.value = true;
+}
+
+function closeEmployee() {
+  isDeleteEmployee.value = false;
+  isInfo.value = true;
 }
 
 onMounted(async () => {
@@ -394,6 +424,24 @@ onUnmounted(() => {
       </template>
     </BaseModal>
     <!-- /showModals -->
+
+    <!-- Delete employee -->
+    <DeleteModal :show="isDeleteEmployee" @close="closeEmployee" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete employee -->
   </Teleport>
   <!-- /Modal -->
 </template>

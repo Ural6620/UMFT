@@ -43,6 +43,7 @@ const limitQrCode = 14;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
 const alert = ref('')
+const isDeleteEmployee = ref(false);
 
 const form = reactive({
   title: "",
@@ -51,6 +52,15 @@ const form = reactive({
   type: "",
   status: "",
 });
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
+})
 
 const handleDelete = async () => {
   pageNum.value = 1;
@@ -297,8 +307,28 @@ function handleResize() {
   isLargeScreen.value = window.innerWidth > 760;
 }
 
-function reload() {
+async function reload(id) {
+  isInfo.value = false;
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
+
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limitQrCode, pageInfo.value, "", roomId.value);
+  isInfo.value = true;
+}
+
+function closeEmployee() {
+  isDeleteEmployee.value = false;
+  isInfo.value = true;
 }
 
 onMounted(async () => {
@@ -345,7 +375,7 @@ onUnmounted(() => {
           <span class="flex items-center justify-between">
             <span class="block truncate text-[#8BA3CB]">{{
               filialSelect
-            }}</span>
+              }}</span>
             <ChevronDownIcon class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
               :class="isFilial ? 'rotate-180 transform' : ''" />
           </span>
@@ -418,7 +448,7 @@ onUnmounted(() => {
             <span class="flex items-center justify-between">
               <span class="block truncate text-[#8BA3CB]">{{
                 filialSelect
-              }}</span>
+                }}</span>
               <ChevronDownIcon class="relative -right-6 h-4 w-4 text-[#8BA3CB] transition duration-300 ease-linear"
                 :class="isFilial ? 'rotate-180 transform' : ''" />
             </span>
@@ -547,6 +577,24 @@ onUnmounted(() => {
       </template>
     </BaseModal>
     <!-- /showModal -->
+
+    <!-- Delete employee -->
+    <DeleteModal :show="isDeleteEmployee" @close="closeEmployee" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
+    <!-- /Delete employee -->
   </Teleport>
   <!-- /Modal  -->
 

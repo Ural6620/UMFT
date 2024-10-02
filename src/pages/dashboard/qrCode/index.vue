@@ -2,11 +2,11 @@
 import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { saveAs } from "file-saver";
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import { useQrCodeStore } from "@/stores/qrCode";
 import { useRoomStore } from "@/stores/room";
 import { useProductStore } from "@/stores/product";
-import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon, MagnifyingGlassIcon, ArrowUturnLeftIcon } from "@heroicons/vue/24/solid";
+import { useEmployeeStore } from "@/stores/employee";
+import { ArrowDownOnSquareStackIcon, XMarkIcon, Bars3Icon, MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 import { colInfo } from "@/components/constants/constants";
 import api from "@/plugins/axios";
 import JSZip from "jszip";
@@ -16,13 +16,14 @@ import SelectFilial from "@/components/form/SelectFilial.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import SelectQr from "@/components/form/selectQr.vue";
+import DeleteModal from "@/components/ui/DeleteModal.vue";
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const qrCodeStore = useQrCodeStore();
 const roomStore = useRoomStore();
 const productStore = useProductStore();
+const employeeStore = useEmployeeStore();
 const showModal = ref(false);
 const urlQrCode = ref("");
 const qrCode = ref("");
@@ -31,6 +32,7 @@ const limit = 30;
 const isLargeScreen = ref(window.innerWidth >= 760);
 const isMobile = ref(false);
 const isDownloadModal = ref(false);
+const isDeleteEmployee = ref(false);
 const titleProduct = reactive({
   _id: "",
   title: "Маҳсулотни танланг"
@@ -39,6 +41,15 @@ const titleProduct = reactive({
 const titleRoom = reactive({
   _id: "",
   title: "Хонани танланг"
+})
+
+const formEmployee = reactive({
+  _id: '',
+  employee: null,
+  room: '',
+  price: 0,
+  invoice: '',
+  product: ''
 })
 
 async function downloadFile(item) {
@@ -66,6 +77,26 @@ function openDownload() {
   isDownloadModal.value = true;
 }
 
+async function closeDownload() {
+  titleProduct._id = "";
+  titleRoom._id = "";
+  titleProduct.title = "Маҳсулотни танланг";
+  titleRoom.title = "Хонани танланг";
+  await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
+  isDownloadModal.value = false;
+}
+
+function clearProduct() {
+  titleProduct._id = "";
+  titleProduct.title = "Маҳсулотни танланг";
+}
+
+
+function clearRoom() {
+  titleRoom._id = "";
+  titleRoom.title = "Хонани танланг";
+}
+
 async function downloadAllFiles() {
   isMobile.value = false;
   await qrCodeStore.getAll(0, 1, titleProduct._id, titleRoom._id);
@@ -89,10 +120,11 @@ async function downloadAllFiles() {
   }
   titleProduct._id = "";
   titleRoom._id = "";
+  titleProduct.title = "Маҳсулотни танланг";
+  titleRoom.title = "Хонани танланг";
   pageNum.value = 1;
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
   isDownloadModal.value = false;
-
 }
 
 async function showFile(item) {
@@ -120,7 +152,7 @@ async function filter() {
   pageNum.value = 1;
   await router.push({
     name: "qrCode",
-    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id, titleProduct: titleProduct.title, titleRoom: titleRoom.title },
   });
   await qrCodeStore.getAll(
     limit,
@@ -154,7 +186,6 @@ async function nextPage() {
   goPage(pageNum.value);
 }
 
-
 async function clear() {
   titleProduct._id = "";
   titleRoom._id = "";
@@ -163,7 +194,7 @@ async function clear() {
   pageNum.value = 1;
   await router.push({
     name: "qrCode",
-    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
+    query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id, titleProduct: titleProduct.title, titleRoom: titleRoom.title },
   });
   await qrCodeStore.getAll(limit, pageNum.value, titleProduct._id);
 }
@@ -182,7 +213,20 @@ function handleRoom(newRoom) {
   titleRoom.title = newRoom.title;
 }
 
-function reload() {
+async function reload(id) {
+  isDeleteEmployee.value = true;
+  await qrCodeStore.getQrCodeById(id);
+}
+
+async function handleDeleteEmployee() {
+  formEmployee._id = qrCodeStore.qrcodeById?._id;
+  formEmployee.employee = null;
+  formEmployee.room = qrCodeStore.qrcodeById?.room?._id;
+  formEmployee.price = qrCodeStore.qrcodeById?.price;
+  formEmployee.invoice = qrCodeStore.qrcodeById?.invoice?._id;
+  formEmployee.product = qrCodeStore.qrcodeById?.product?._id;
+  await qrCodeStore.updateQrCode(formEmployee);
+  isDeleteEmployee.value = false;
   qrCodeStore.getAll(limit, pageNum.value, titleProduct._id, titleRoom._id);
 }
 
@@ -191,9 +235,13 @@ onMounted(async () => {
   const queryPage = route.query.page || 1;
   const queryProduct = route.query.product || '';
   const queryRoom = route.query.room || '';
+  const queryTitleRoom = route.query.titleRoom;
+  const queryTitleProduct = route.query.titleProduct;
   pageNum.value = Number(queryPage) || 1;
   titleProduct._id = queryProduct || "";
   titleRoom._id = queryRoom || "";
+  titleProduct.title = queryTitleProduct || "Маҳсулотни танланг";
+  titleRoom.title = queryTitleRoom || "Хонани танланг";
   await router.push({
     name: "qrCode",
     query: { page: pageNum.value, product: titleProduct._id, room: titleRoom._id },
@@ -312,18 +360,27 @@ onUnmounted(() => {
         </div>
       </template>
     </BaseModal>
-    <BaseModal :show="isDownloadModal" @close="isDownloadModal = false">
+    <BaseModal :show="isDownloadModal" @close="closeDownload">
       <template #header> Қр Код юклаш </template>
       <template #body>
-        <div class="flex flex-col gap-4 items-center justify-center p-20">
+        <div class="flex flex-col gap-4 items-center justify-center p-10">
           <!-- Filter Qr Code -->
-          <SelectFilial placeholder="Маҳсулот буйича саралаш" :data="productStore.products" class="w-full lg:w-1/2"
-            v-model="titleProduct" />
+          <div class="flex gap-2 items-baseline w-full lg:w-1/2">
+            <SelectQr :placeholder="titleProduct" :data="productStore.products" class="flex-1"
+              @update="handleProduct" />
+            <BaseButton @click="clearProduct" color="orange">
+              <XMarkIcon class="h-4 w-4 " />
+            </BaseButton>
+          </div>
           <!-- /Filter Qr Code -->
 
           <!-- Filter Room -->
-          <SelectFilial placeholder="Хона буйича саралаш" :data="roomStore.rooms" class="w-full lg:w-1/2"
-            v-model="orderRoom" />
+          <div class="flex gap-2 items-baseline w-full lg:w-1/2">
+            <SelectQr :placeholder="titleRoom" :data="roomStore.rooms" class="flex-1" @update="handleRoom" />
+            <BaseButton @click="clearRoom" color="orange">
+              <XMarkIcon class="h-4 w-4" />
+            </BaseButton>
+          </div>
           <!-- /Filter Room -->
 
           <BaseButton @click="downloadAllFiles()" color="blue" class="w-full lg:w-1/2">
@@ -333,6 +390,21 @@ onUnmounted(() => {
         </div>
       </template>
     </BaseModal>
+    <DeleteModal :show="isDeleteEmployee" @close="isDeleteEmployee = false" @delete="handleDeleteEmployee">
+      <div class="flex justify-center">
+        <p class="text-gray-500">
+          Сиз
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.employee?.full_name
+          }}</span>
+          xodimdan
+          <span class="capitalize text-red-400">{{
+            qrCodeStore.qrcodeById?.product?.title
+          }}</span>
+          маҳсулотини учирмоқдасиз!
+        </p>
+      </div>
+    </DeleteModal>
   </Teleport>
   <!-- /Modal -->
 

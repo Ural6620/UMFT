@@ -17,7 +17,7 @@ export const useEmployeeStore = defineStore('employee', {
 
     async getDepartment() {
       const response = await api.get('/employee');
-      this.departments = response.data.data.map((item) => item.department)
+      this.departments = response.data.data.map((item) => item.department);
     },
     async patch() {
       await api.patch("/employee");
@@ -25,6 +25,6 @@ export const useEmployeeStore = defineStore('employee', {
     async editeEmployee(data) {
       await api.put("/employee", data);
     },
-    
+
   }
 })
